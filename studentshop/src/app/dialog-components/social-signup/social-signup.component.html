@@ -1,0 +1,110 @@
+<div class="dialog-card">
+  <div class="card-section">
+    <h4 class="dialog-title">Sign up</h4>
+    @if (currentPage === 1) {
+      <form class="form" id="page1" #form="ngForm" (ngSubmit)="nextPage(form)" novalidate>
+        <div class="input-wrap">
+          <label>Full Name</label>
+          <input [(ngModel)]="name" [ngClass]="{'error': (form['submitted'] && form.controls['name'].invalid)}" required name="name" autocomplete="name" class="form-field input" minlength="1" maxlength="100" placeholder="Enter your full name" [pattern]="nonEmptyRegex" type="text">
+          <div class="form-error-text" *ngIf="form['submitted'] && form.controls['name'].invalid">
+            @if (form.controls['name'].errors?.['required']) {
+              *Full name is required.
+            } @else {
+              *Full name is invalid.
+            }
+          </div>
+        </div>
+        <div class="input-wrap">
+          <label>Username</label>
+          <input [(ngModel)]="username" (ngModelChange)="validateUsername(form)" [ngClass]="{'error': (form['submitted'] && form.controls['username'].invalid)}" required name="username" class="form-field input" minlength="1" maxlength="36" placeholder="Create a username" [pattern]="usernameRegex" type="text">
+          <div class="form-error-text" *ngIf="form['submitted'] && form.controls['username'].invalid">
+            @if (form.controls['username'].errors?.['required']) {
+              *Username is required.
+            } @else if (form.controls['username'].errors?.['pattern']) {
+              *Username must be at least 3 characters and contain only lowercase letters, numbers, underscores, dashes, or full stops.
+            } @else if (form.controls['username'].errors?.['usernameTaken']) {
+              *Username is already taken.
+            } @else {
+              *Username is invalid.
+            }
+          </div>
+        </div>
+      </form>
+    } @else if (currentPage === 2) {
+      <form class="form" id="page2" #form="ngForm" (ngSubmit)="nextPage(form)" novalidate>
+        <div [class.disabled]="isNotStudent" class="input-wrap">
+          <label>Select your school</label>
+          <div #schoolCombobox class="combobox-wrap">
+            <div *ngIf="selectedSchool" class="combobox-categories">
+              <div class="category">
+                <div class="category-text">{{ selectedSchool.name }}</div>
+                <button type="button" (click)="removeSelectedSchool()" class="button circle-btn no-border transparent mini"><i class="fi fi-rr-cross icon nano-icon"></i></button>
+              </div>
+            </div>
+            <input [disabled]="isNotStudent" #schoolInput [(ngModel)]="schoolSearchQuery" (ngModelChange)="serveSchools()" *ngIf="!selectedSchool" (focusin)="isSchoolsAutocompleteVisible = true" name="school" autocomplete="off" class="nested-form-field input" placeholder="Enter your school" type="text">
+          </div>
+          <div #schoolAutocompleteDropdown *ngIf="isSchoolsAutocompleteVisible" class="dropdown-wrap">
+            <div class="custom-dropdown">
+              <p *ngIf="querySchools.length === 0" class="text-fine-print">No matches found.</p>
+              @for (school of querySchools; track $index) {
+                <button type="button" (click)="addSelectedSchool(school)" class="button no-border small dropdown-result">{{ school }}</button>
+              }
+            </div>
+          </div>
+        </div>
+        <div [class.disabled]="isNotStudent" class="input-wrap">
+          <label>Select your subjects</label>
+          <div #subjectCombobox class="combobox-wrap">
+            <div *ngIf="selectedSubjects.length > 0" class="combobox-categories">
+              @for (selectedSubject of selectedSubjects; track $index) {
+                <div class="subject-category category">
+                  <div class="category-text">{{ selectedSubject }}</div>
+                  <button type="button" (click)="removeSelectedSubject(selectedSubject)" class="button circle-btn no-border transparent mini"><i class="fi fi-rr-cross icon nano-icon"></i></button>
+                </div>
+              }
+            </div>
+            <input [disabled]="isNotStudent" #subjectInput [(ngModel)]="subjectSearchQuery" (ngModelChange)="serveSubjects()" *ngIf="selectedSubjects.length < 6" (focusin)="isSubjectsAutocompleteVisible = true" name="subject" autocomplete="off" class="nested-form-field input" placeholder="Enter your subjects" type="text">
+          </div>
+          <div #subjectAutocompleteDropdown *ngIf="isSubjectsAutocompleteVisible" class="dropdown-wrap">
+            <div class="custom-dropdown">
+              <p *ngIf="getSubjectsAutocompleteList().length === 0" class="text-fine-print">No matches found.</p>
+              @for (subject of getSubjectsAutocompleteList(); track $index) {
+                <button type="button" (click)="addSelectedSubject(subject)" class="button no-border small dropdown-result">{{ subject }}</button>
+              }
+            </div>
+          </div>
+        </div>
+        <div class="input-wrap">
+          <label class="checkbox-container"><input [(ngModel)]="isNotStudent" name="isStudent" type="checkbox"><div class="checkbox"></div>
+            <p>I am not a student</p>
+          </label>
+        </div>
+      </form>
+    } @else if (currentPage === 3) {
+      <form class="form" id="page3" #form="ngForm" (ngSubmit)="registerUser(form)" novalidate>
+        <div class="input-wrap">
+          <label class="checkbox-container"><input [(ngModel)]="isAcceptedTerms" name="isAcceptedTerms" type="checkbox"><div class="checkbox"></div>
+            <p>I agree to the <a [routerLink]="['terms-of-service']" target="_blank" rel="noopener noreferrer" class="link-underline-hover pink">Terms of Service</a> and the <a [routerLink]="['privacy-policy']" target="_blank" rel="noopener noreferrer" class="link-underline-hover pink">Privacy Policy</a>.</p>
+          </label>
+        </div>
+      </form>
+    }
+  </div>
+  <div *ngIf="errorMessage">
+    <div class="form-error-text" *ngIf="errorMessage">{{ errorMessage }}</div>
+  </div>
+  <div class="item-actions">
+    <button [disabled]="isLoading" *ngIf="currentPage !== 1" (click)="previousPage()" class="action-btn button">
+      <div class="button-text-wrap"><i class="fi fi-rr-arrow-small-left icon small-icon"></i>Previous</div>
+    </button>
+    @if (currentPage === 3) {
+      <button [disabled]="isLoading || !isAcceptedTerms" [attr.form]="'page'+currentPage" type="submit" class="action-btn dark button">
+        <div class="button-text-wrap">{{ isLoading? "Loading..." : "Create account" }}</div>
+      </button>
+    } @else {
+      <button [disabled]="isLoading" [attr.form]="'page'+currentPage" type="submit" class="action-btn dark button">
+        <div class="button-text-wrap">Next<i class="fi fi-rr-arrow-small-right white icon small-icon"></i></div>
+      </button>
+    }
+  </div>
+</div>

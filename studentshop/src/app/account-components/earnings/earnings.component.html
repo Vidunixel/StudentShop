@@ -1,0 +1,125 @@
+<h3 class="settings-heading">Earnings</h3>
+<div *ngIf="errorMessage" class="overview info-message">
+  <div class="overview-left">
+    <i class="fi fi-rr-cross-circle icon small-icon"></i>
+    <div class="label-wrap">
+      <p>{{ errorMessage }}</p>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="loading-bar"></div>
+  </div>
+  <div class="card-section">
+    @if (authenticationService.isLoggedIn) {
+      <div class="overview">
+        <div class="overview-left large">
+          <div class="label-wrap">
+            <div class="title">{{ nativeUser?.balance | formatPrice:FormatPricePipe.prefixType.MINUS_ONLY }}</div>
+            <p class="text-fine-print">Available balance: {{ nativeUser?.availableBalance | formatPrice:FormatPricePipe.prefixType.MINUS_ONLY }}</p>
+          </div>
+        </div>
+        <div class="overview-right">
+          <button (click)="toggleWithdraw()" class="action-btn button pill-btn dark">
+            <div class="button-text-wrap"><i class="fi fi-rr-send-money icon mini-icon white"></i>Withdraw</div>
+          </button>
+        </div>
+      </div>
+      <div class="menu-separator"></div>
+      @if (transactions.length > 0) {
+        <div class="table-wrap">
+          <table>
+            <tr>
+              <th><div class="table-content-wrap"><div class="table-text">Date</div></div></th>
+              <th><div class="table-content-wrap"><div class="table-text">Item / PayPal Identifier</div></div></th>
+              <th><div class="table-content-wrap"><div class="table-text">Type</div></div></th>
+              <th><div class="table-content-wrap"><div class="table-text">Amount</div></div></th>
+              <th><div class="table-content-wrap"><div class="table-text">Status</div></div></th>
+              <th></th>
+            </tr>
+            @for (transaction of transactions; track $index) {
+              <tr>
+                <td>
+                  <div class="table-content-wrap">
+                    <div class="table-text">{{ transaction.dateCreated.toLocaleDateString("en-AU", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric"
+                    }) }}</div>
+                  </div>
+                </td>
+                <td>
+                  @if ([Transaction.TransactionType.SALE, Transaction.TransactionType.REFUND].includes(transaction.info?.transactionType || "")) {
+                    @switch (transaction.detailedItem?._index) {
+                      @case (Note.indexName) {
+                        <div class="table-content-wrap content-align-left">
+                          <a [routerLink]="['/notes', transaction.detailedItem?._id]" class="table-text link-underline-hover"> {{ transaction.detailedItem?.title }} </a>
+                        </div>
+                      }
+                    }
+                  } @else if (transaction.info?.transactionType === Transaction.TransactionType.WITHDRAWAL) {
+                    <div class="table-content-wrap">
+                      <div class="table-text">{{ transaction.withdrawal?.paypalRecipient?.identifier }}</div>
+                    </div>
+                  } @else {
+                    <div class="table-content-wrap">
+                      <div class="table-text">N/A</div>
+                    </div>
+                  }
+                </td>
+                <td>
+                  <div class="table-content-wrap">
+                    <div class="table-text">
+                      @switch (transaction.info?.transactionType) {
+                        @case (Transaction.TransactionType.REFUND) {Refund}
+                        @case (Transaction.TransactionType.SALE) {Sale}
+                        @case (Transaction.TransactionType.WITHDRAWAL) {Withdrawal}
+                      }
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap content-align-right">
+                    <div class="table-text">{{ transaction.amount | formatPrice:FormatPricePipe.prefixType.PLUS_AND_MINUS }}</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap">
+                    <div class="item-details">
+                      <div class="category status" [style.background-color]="(transaction | getStatus).backgroundColour">
+                        <div class="category-text status" [style.color]="(transaction | getStatus).textColour">
+                          {{ (transaction | getStatus).text }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap">
+                    <button (click)="toggleContextMenu($event, transaction)" type="button" class="button no-border circle-btn small transparent">
+                      <i class="fi fi-rs-menu-dots-vertical icon mini-icon"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </table>
+        </div>
+        <div *ngIf="isLoadMoreEnabled" class="items-footer">
+          <button (click)="serveTransactions(transactions[transactions.length -1].sort)" class="pill-btn small button">
+            <div class="small-text button-text-wrap">Load More</div>
+          </button>
+        </div>
+      } @else {
+        <div class="empty-message-wrap">
+          <p class="footer-text">You haven’t made any sales or withdrawals yet. Earnings transactions appear here.</p>
+        </div>
+      }
+    } @else {
+      <div class="empty-message-wrap">
+        <p class="footer-text"><a (click)="toggleLogin()" class="link-underline-hover pink">Log in</a> or <a (click)="toggleSignup()" class="link-underline-hover pink">sign up</a> to view earnings.</p>
+      </div>
+    }
+  </div>
+</div>

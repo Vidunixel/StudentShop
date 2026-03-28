@@ -1,0 +1,30 @@
+<div class="dialog-card">
+  <button (click)="closeAllDialogs()" class="button circle-btn no-border outer-corner"><i class="fi fi-rr-cross icon micro-icon"></i></button>
+  <div class="card-section">
+    <h4 class="dialog-title">Update email</h4>
+    <form class="form" id="updateEmail" #form="ngForm" (ngSubmit)="updateEmail(form)" novalidate>
+      <div class="input-wrap">
+        <label>New Email</label>
+        <input [(ngModel)]="email" [ngClass]="{'error': (form['submitted'] && form.controls['email'].invalid)}" required name="email" autocomplete="email" class="form-field input" maxlength="320" placeholder="Enter your new email" [pattern]="emailRegex" type="email">
+        <div *ngIf="form['submitted'] && form.controls['email'].invalid" class="form-error-text">
+          @if (form.controls['email'].errors?.['required']) {
+            *Email is required.
+          } @else if (form.controls['email'].errors?.['pattern']) {
+            *Invalid email format.
+          } @else {
+            *Email is invalid.
+          }
+        </div>
+      </div>
+    </form>
+  </div>
+  <div *ngIf="errorMessage || successMessage">
+    <div class="form-error-text" *ngIf="errorMessage">{{ errorMessage }}</div>
+    <div *ngIf="successMessage" class="form-success-text"><i class="fi fi-br-check icon micro-icon green"></i>{{ successMessage }}</div>
+  </div>
+  <div class="item-actions">
+    <button [disabled]="isLoading" form="updateEmail" type="submit" class="action-btn dark button">
+      <div class="button-text-wrap">{{ isLoading? "Loading..." : "Update" }}</div>
+    </button>
+  </div>
+</div>

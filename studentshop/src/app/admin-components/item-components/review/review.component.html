@@ -1,0 +1,173 @@
+<h3 class="settings-heading" xmlns="http://www.w3.org/1999/html">Reviews</h3>
+<div *ngIf="errorMessage" class="overview info-message">
+  <div class="overview-left">
+    <i class="fi fi-rr-cross-circle icon small-icon"></i>
+    <div class="label-wrap">
+      <p>{{ errorMessage }}</p>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="loading-bar"></div>
+  </div>
+  @if (errorMessage) {
+    <app-page-not-found></app-page-not-found>
+  } @else {
+    @if (authenticationService.isLoggedIn && [NativeUser.AccountType.ADMIN, NativeUser.AccountType.STAFF].includes(nativeUser?.accountType || '')) {
+      <div class="grid-container">
+        <div class="card-section">
+          <div class="overview">
+            <div class="overview-span">
+              <div class="table-wrap">
+                <table class="unlimited-lines compact flush">
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">ID:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">{{ review?._id }}</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">User:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        @if (review?.isAi) {
+                          <div class="table-text">Assistant</div>
+                        } @else {
+                          <a [routerLink]="['/admin/users', review?.userUid]" class="table-text link-underline-hover">{{ review?.user?.username }}</a>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Item:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        @switch (review?.item?._index) {
+                          @case (Note.indexName) {
+                            <a [routerLink]="['/admin/notes', review?.item?._id]" class="table-text link-underline-hover"> {{ review?.detailedItem?.title }} </a>
+                          }
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Rating:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">
+                          <div class="star-wrapper">
+                            <div class="star-icon w-embed"><svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M11.9999 15.8196L7.5098 18.5619L8.73049 13.4439L4.73535 10.0216L9.97945 9.6015L11.9999 4.74316L14.0204 9.6015L19.2653 10.0216L15.2694 13.4439L16.4901 18.5619L11.9999 15.8196Z" [attr.fill]="(review?.rating || 0) >= 1 ? 'currentColor' : 'var(--neutral--300)'"></path>
+                            </svg></div>
+                            <div class="star-icon w-embed"><svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M11.9999 15.8196L7.5098 18.5619L8.73049 13.4439L4.73535 10.0216L9.97945 9.6015L11.9999 4.74316L14.0204 9.6015L19.2653 10.0216L15.2694 13.4439L16.4901 18.5619L11.9999 15.8196Z" [attr.fill]="(review?.rating || 0) >= 2 ? 'currentColor' : 'var(--neutral--300)'"></path>
+                            </svg></div>
+                            <div class="star-icon w-embed"><svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M11.9999 15.8196L7.5098 18.5619L8.73049 13.4439L4.73535 10.0216L9.97945 9.6015L11.9999 4.74316L14.0204 9.6015L19.2653 10.0216L15.2694 13.4439L16.4901 18.5619L11.9999 15.8196Z" [attr.fill]="(review?.rating || 0) >= 3 ? 'currentColor' : 'var(--neutral--300)'"></path>
+                            </svg></div>
+                            <div class="star-icon w-embed"><svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M11.9999 15.8196L7.5098 18.5619L8.73049 13.4439L4.73535 10.0216L9.97945 9.6015L11.9999 4.74316L14.0204 9.6015L19.2653 10.0216L15.2694 13.4439L16.4901 18.5619L11.9999 15.8196Z" [attr.fill]="(review?.rating || 0) >= 4 ? 'currentColor' : 'var(--neutral--300)'"></path>
+                            </svg></div>
+                            <div class="star-icon w-embed"><svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M11.9999 15.8196L7.5098 18.5619L8.73049 13.4439L4.73535 10.0216L9.97945 9.6015L11.9999 4.74316L14.0204 9.6015L19.2653 10.0216L15.2694 13.4439L16.4901 18.5619L11.9999 15.8196Z" [attr.fill]="(review?.rating || 0) >= 5 ? 'currentColor' : 'var(--neutral--300)'"></path>
+                            </svg></div>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Review:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">{{ review?.review }}</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Date Created:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">
+                          {{ review?.dateCreated?.toLocaleString("en-AU", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: true
+                        }) }}
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Date Updated:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">
+                          {{ review?.dateUpdated?.toLocaleString("en-AU", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: true
+                        }) }}
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+            <div class="overview-right">
+              <div class="item-actions no-stretch">
+                <button (click)="toggleReviewContextMenu($event, review)" type="button" class="button no-border circle-btn small transparent">
+                  <i class="fi fi-rs-menu-dots-vertical icon mini-icon"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    } @else {
+      <div class="card-section">
+        <div class="empty-message-wrap">
+          <p class="footer-text"><a (click)="toggleLogin()" class="link-underline-hover pink">Log in</a> as an administrator/staff to view admin pages.</p>
+        </div>
+      </div>
+    }
+  }
+</div>

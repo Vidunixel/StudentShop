@@ -1,0 +1,184 @@
+<h3 class="settings-heading" xmlns="http://www.w3.org/1999/html">Refunds</h3>
+<div *ngIf="errorMessage" class="overview info-message">
+  <div class="overview-left">
+    <i class="fi fi-rr-cross-circle icon small-icon"></i>
+    <div class="label-wrap">
+      <p>{{ errorMessage }}</p>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="loading-bar"></div>
+  </div>
+  @if (errorMessage) {
+    <app-page-not-found></app-page-not-found>
+  } @else {
+    @if (authenticationService.isLoggedIn && [NativeUser.AccountType.ADMIN, NativeUser.AccountType.STAFF].includes(nativeUser?.accountType || '')) {
+      <div class="grid-container">
+        <div class="card-section">
+          <div class="overview">
+            <div class="overview-span">
+              <div class="table-wrap">
+                <table class="unlimited-lines compact flush">
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">ID:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">{{ refund?._id }}</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">User:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <a [routerLink]="['/admin/users', refund?.purchase?.userUid]" class="table-text link-underline-hover">{{ refund?.purchase?.user?.username }}</a>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Item:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        @switch (refund?.purchase?.item?._index) {
+                          @case (Note.indexName) {
+                            <a [routerLink]="['/admin/notes', refund?.purchase?.item?._id]" class="table-text link-underline-hover"> {{ refund?.purchase?.detailedItem?.title }} </a>
+                          }
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Purchase ID:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">{{ refund?.purchaseId }}</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Reason Type:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">{{ refund?.reasonType }}</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Reason Description:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">{{ refund?.reasonDescription }}</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Status:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="item-details">
+                          <div class="category status" [style.background-color]="(refund | getStatus).backgroundColour">
+                            <div class="category-text status" [style.color]="(refund | getStatus).textColour">
+                              {{ (refund | getStatus).text }}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Date Created:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">
+                          {{ refund?.dateCreated?.toLocaleString("en-AU", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: true
+                        }) }}
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Date Updated:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">
+                          {{ refund?.dateUpdated?.toLocaleString("en-AU", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: true
+                        }) }}
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+            <div class="overview-right">
+              <div *ngIf="refund?.status === Refund.RefundStatus.AWAITING_APPROVAL" class="item-actions no-stretch">
+                <button (click)="approveOrRejectRefund(false)" class="button">
+                  <div class="button-text-wrap justify-left"><i class="fi fi-sr-vote-nay icon mini-icon red"></i>Reject</div>
+                </button>
+                <button (click)="approveOrRejectRefund(true)" class="button">
+                  <div class="button-text-wrap justify-left"><i class="fi fi-sr-vote-yea icon mini-icon green"></i>Approve</div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    } @else {
+      <div class="card-section">
+        <div class="empty-message-wrap">
+          <p class="footer-text"><a (click)="toggleLogin()" class="link-underline-hover pink">Log in</a> as an administrator/staff to view admin pages.</p>
+        </div>
+      </div>
+    }
+  }
+</div>

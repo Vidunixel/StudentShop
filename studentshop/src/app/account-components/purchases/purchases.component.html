@@ -1,0 +1,105 @@
+<h3 class="settings-heading">Purchases</h3>
+<div *ngIf="errorMessage" class="overview info-message">
+  <div class="overview-left">
+    <i class="fi fi-rr-cross-circle icon small-icon"></i>
+    <div class="label-wrap">
+      <p>{{ errorMessage }}</p>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="loading-bar"></div>
+  </div>
+  <div class="card-section">
+    @if (authenticationService.isLoggedIn) {
+      @if (purchases.length > 0) {
+        <div class="table-wrap">
+          <table>
+            <tr>
+              <th><div class="table-content-wrap"><div class="table-text">Date</div></div></th>
+              <th><div class="table-content-wrap"><div class="table-text">Item</div></div></th>
+              <th><div class="table-content-wrap"><div class="table-text">Price</div></div></th>
+              <th><div class="table-content-wrap"><div class="table-text">Status</div></div></th>
+              <th><div class="table-content-wrap"><div class="table-text">Method</div></div></th>
+              <th></th>
+            </tr>
+            @for (purchase of purchases; track $index) {
+              <tr>
+                <td>
+                  <div class="table-content-wrap">
+                    <div class="table-text">{{ purchase.dateCreated.toLocaleDateString("en-AU", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric"
+                    }) }}</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap content-align-left">
+                    @switch (purchase.item?._index) {
+                      @case (Note.indexName) {
+                        <a [routerLink]="['/notes', purchase.item?._id]" class="table-text link-underline-hover"> {{ purchase.detailedItem?.title }} </a>
+                      }
+                    }
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap content-align-right">
+                    <div class="table-text">{{ purchase.price?.total | formatPrice:FormatPricePipe.prefixType.NONE }}</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap">
+                    <div class="item-details">
+                      <div class="category status" [style.background-color]="(purchase | getStatus).backgroundColour">
+                        <div class="category-text status" [style.color]="(purchase | getStatus).textColour">
+                          {{ (purchase | getStatus).text }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap content-align-right">
+                    @switch (purchase.paymentMethod) {
+                      @case (Purchase.PaymentMethod.FREE) {
+                        Free
+                      }
+                      @case (Purchase.PaymentMethod.PAYPAL) {
+                        <img src="/icons/paypal_logo_wide.svg" loading="lazy" class="icon medium-large-icon no-height-restrictions">
+                      }
+                      @case (Purchase.PaymentMethod.CREDIT) {
+                        Credit
+                      }
+                    }
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap">
+                    <button (click)="toggleContextMenu($event, purchase)" type="button" class="button no-border circle-btn small transparent">
+                      <i class="fi fi-rs-menu-dots-vertical icon mini-icon"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </table>
+        </div>
+        <div *ngIf="isLoadMoreEnabled" class="items-footer">
+          <button (click)="servePurchases(purchases[purchases.length -1].sort)" class="pill-btn small button">
+            <div class="small-text button-text-wrap">Load More</div>
+          </button>
+        </div>
+      } @else {
+        <div class="empty-message-wrap">
+          <p class="footer-text">You haven’t made any purchases yet. Purchase transactions appear here.</p>
+        </div>
+      }
+    } @else {
+      <div class="empty-message-wrap">
+        <p class="footer-text"><a (click)="toggleLogin()" class="link-underline-hover pink">Log in</a> or <a (click)="toggleSignup()" class="link-underline-hover pink">sign up</a> to manage purchases.</p>
+      </div>
+    }
+  </div>
+</div>

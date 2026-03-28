@@ -1,0 +1,195 @@
+<h3 class="settings-heading">Purchases</h3>
+<div *ngIf="errorMessage" class="overview info-message">
+  <div class="overview-left">
+    <i class="fi fi-rr-cross-circle icon small-icon"></i>
+    <div class="label-wrap">
+      <p>{{ errorMessage }}</p>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-section">
+    @if (authenticationService.isLoggedIn && [NativeUser.AccountType.ADMIN, NativeUser.AccountType.STAFF].includes(nativeUser?.accountType || '')) {
+      <form class="overview" id="filter" #form="ngForm" (ngSubmit)="servePurchases()" novalidate>
+        <div class="overview-left filters large">
+          <div class="input-wrap">
+            <label>ID*</label>
+            <input [(ngModel)]="filters._id" required name="purchaseId" autocomplete="purchaseId" class="form-field input" placeholder="Enter a purchase ID" type="text">
+          </div>
+          <div class="input-wrap">
+            <label>User UID*</label>
+            <input [(ngModel)]="filters.userUid" required name="userUid" autocomplete="userUid" class="form-field input" placeholder="Enter a user UID" type="text">
+          </div>
+          <div class="input-wrap">
+            <label>Seller UID*</label>
+            <input [(ngModel)]="filters.sellerUid" required name="sellerUid" autocomplete="sellerUid" class="form-field input" placeholder="Enter a seller UID" type="text">
+          </div>
+          <div class="input-wrap">
+            <label>Order ID*</label>
+            <input [(ngModel)]="filters.orderId" required name="orderId" autocomplete="orderId" class="form-field input" placeholder="Enter an order ID" type="text">
+          </div>
+          <div class="input-wrap">
+            <label>Payment Method*</label>
+            <select [(ngModel)]="filters.paymentMethod" class="dropdown-sort select" name="method">
+              <option value="">-- Any --</option>
+              @for (method of Object.entries(Purchase.PaymentMethod); track $index) {
+                <option value="{{method[1]}}">{{ method[0] }}</option>
+              }
+            </select>
+          </div>
+          <div class="input-wrap">
+            <label>Status*</label>
+            <select [(ngModel)]="filters.status" class="dropdown-sort select" name="status">
+              <option value="">-- Any --</option>
+              @for (status of Object.entries(Purchase.PurchaseStatus); track $index) {
+                <option value="{{status[1]}}">{{ status[0] }}</option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="overview-right">
+          <div class="item-actions no-stretch">
+            <select [(ngModel)]="sortBy" class="dropdown-sort select" name="sortBy">
+              <option value="date-created-desc">Date Created: Newest</option>
+              <option value="date-created-asc">Date Created: Oldest</option>
+              <option value="date-updated-desc">Date Updated: Newest</option>
+              <option value="date-updated-asc">Date Updated: Oldest</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+            </select>
+            <button type="submit" class="action-btn button pill-btn dark">
+              <div class="button-text-wrap"><i class="fi fi-rr-search icon mini-icon white"></i>Search</div>
+            </button>
+            <button (click)="clearForm(form)" type="button" class="button circle-btn small">
+              <i class="fi fi-rr-cross icon mini-icon"></i>
+            </button>
+          </div>
+        </div>
+      </form>
+      @if (isLoading) {
+        <div class="loading-container">
+          <div class="loading-bar"></div>
+        </div>
+      } @else {
+        <div class="menu-separator"></div>
+      }
+      @if (purchases.length > 0) {
+        <div class="table-wrap">
+          <table class="compact">
+            <tr>
+              <th class="table-link-cell"></th>
+              <th><div class="table-content-wrap"><div class="table-text">User</div></div></th>
+              <th><div class="table-content-wrap"><div class="table-text">Seller</div></div></th>
+              <th><div class="table-content-wrap"><div class="table-text">Item</div></div></th>
+              <th><div class="table-content-wrap"><div class="table-text">Price</div></div></th>
+              <th><div class="table-content-wrap"><div class="table-text">Status</div></div></th>
+              <th><div class="table-content-wrap"><div class="table-text">Method</div></div></th>
+              <th><div class="table-content-wrap"><div class="table-text">Date Created</div></div></th>
+              <th><div class="table-content-wrap"><div class="table-text">Date Updated</div></div></th>
+              <th></th>
+            </tr>
+            @for (purchase of purchases; track $index) {
+              <tr class="table-link">
+                <td class="table-link-cell">
+                  <a [routerLink]="['/admin/purchases', purchase._id]" tabindex="0" class="link-block"></a>
+                </td>
+                <td>
+                  <div class="table-content-wrap">
+                    <a [routerLink]="['/admin/users', purchase.userUid]" class="table-text link-underline-hover">{{ purchase.user?.username }}</a>
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap">
+                    <a [routerLink]="['/admin/users', purchase.sellerUid]" class="table-text link-underline-hover">{{ purchase.seller?.username }}</a>
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap content-align-left">
+                    @switch (purchase.item?._index) {
+                      @case (Note.indexName) {
+                        <a [routerLink]="['/admin/notes', purchase.item?._id]" class="table-text link-underline-hover"> {{ purchase.detailedItem?.title }} </a>
+                      }
+                    }
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap content-align-right">
+                    <div class="table-text">{{ purchase.price?.total | formatPrice:FormatPricePipe.prefixType.MINUS_ONLY }}</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap">
+                    <div class="item-details">
+                      <div class="category status" [style.background-color]="(purchase | getStatus).backgroundColour">
+                        <div class="category-text status" [style.color]="(purchase | getStatus).textColour">
+                          {{ (purchase | getStatus).text }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap content-align-right">
+                    @switch (purchase.paymentMethod) {
+                      @case (Purchase.PaymentMethod.FREE) {
+                        Free
+                      }
+                      @case (Purchase.PaymentMethod.PAYPAL) {
+                        <img src="/icons/paypal_logo_wide.svg" loading="lazy" class="icon medium-large-icon no-height-restrictions">
+                      }
+                      @case (Purchase.PaymentMethod.CREDIT) {
+                        Credit
+                      }
+                    }
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap">
+                    <div class="table-text">{{ purchase.dateCreated.toLocaleDateString("en-AU", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric"
+                    }) }}</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap">
+                    <div class="table-text">{{ purchase.dateUpdated.toLocaleDateString("en-AU", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric"
+                    }) }}</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap">
+                    <button (click)="toggleContextMenu($event, purchase)" type="button" class="button no-border circle-btn small transparent">
+                      <i class="fi fi-rs-menu-dots-vertical icon mini-icon"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </table>
+        </div>
+        <div class="items-footer">
+          @if (isLoadMoreEnabled) {
+            <button (click)="servePurchases(purchases[purchases.length -1].sort)" class="pill-btn small button">
+              <div class="small-text button-text-wrap">Load More</div>
+            </button>
+          } @else {
+            <p class="text-fine-print align-center">You've reached the end. No more purchases beyond this point.</p>
+          }
+        </div>
+      } @else {
+        <div class="empty-message-wrap">
+          <p class="footer-text">Search returned no results.</p>
+        </div>
+      }
+    } @else {
+      <div class="empty-message-wrap">
+        <p class="footer-text"><a (click)="toggleLogin()" class="link-underline-hover pink">Log in</a> as an administrator/staff to view admin pages.</p>
+      </div>
+    }
+  </div>
+</div>

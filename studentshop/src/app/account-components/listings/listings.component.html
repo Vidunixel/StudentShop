@@ -1,0 +1,57 @@
+<h3 class="settings-heading">Manage Listings</h3>
+<div *ngIf="errorMessage" class="overview info-message">
+  <div class="overview-left">
+    <i class="fi fi-rr-cross-circle icon small-icon"></i>
+    <div class="label-wrap">
+      <p>{{ errorMessage }}</p>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="loading-bar"></div>
+  </div>
+  <div class="card-section">
+    @if (authenticationService.isLoggedIn) {
+      @if (notes.length > 0) {
+        <div class="blocks">
+          @for (note of notes; track $index) {
+            <button (click)="toggleEditListing(note)" class="button block vertical-listing small-listing">
+              <div class="inner-corner small-corner"><i class="fi fi-rr-pencil icon mini-icon"></i></div>
+              <div class="item-thumb"><img src="{{ note | getImageUrl }}" loading="lazy" class="item-cover small"></div>
+              <div class="item-wrap">
+                <div class="item-content">
+                  <div class="item-section">
+                    <div class="title item-title block-title">{{ note.title }}</div>
+                    <div class="item-details">
+                      <div class="subject-category category status" [style.background-color]="(note | getStatus).backgroundColour">
+                        <div class="category-text status" [style.color]="(note | getStatus).textColour">{{ (note | getStatus).text }}</div>
+                      </div>
+                    </div>
+                    <div class="item-details">Created: {{ note.dateCreated | formatDate }}</div>
+                    <div class="item-info">{{ note.description }}</div>
+                  </div>
+                </div>
+              </div>
+            </button>
+          }
+        </div>
+        @if (notesIsLoadMoreEnabled) {
+          <div class="items-footer">
+            <button (click)="serveNotes(notes[notes.length -1].sort)" class="pill-btn small button">
+              <div class="small-text button-text-wrap">Load More</div>
+            </button>
+          </div>
+        }
+      } @else {
+        <div class="empty-message-wrap">
+          <p class="footer-text">You have no listings. Manage items you've listed for sale here.</p>
+        </div>
+      }
+    } @else {
+      <div class="empty-message-wrap">
+        <p class="footer-text"><a (click)="toggleLogin()" class="link-underline-hover pink">Log in</a> or <a (click)="toggleSignup()" class="link-underline-hover pink">sign up</a> to manage listings.</p>
+      </div>
+    }
+  </div>
+</div>

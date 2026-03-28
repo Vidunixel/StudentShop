@@ -1,0 +1,356 @@
+@if (isError) {
+  <app-page-not-found></app-page-not-found>
+} @else {
+  <section class="section-header">
+    <div class="container">
+      <div class="item-heading-wrap">
+        <div class="item-cover-large-wrap">
+          <img src="{{ note | getImageUrl }}" loading="lazy" class="item-cover-large">
+          <div class="item-actions vertical">
+            @if (isItemInCart(note?._index, note?._id)) {
+              <button (click)="removeCartItem(note?._index, note?._id)" class="action-btn large thick-border button">
+                <div class="button-text-wrap"><i class="fi fi-rr-bag-shopping-minus icon small-icon"></i>Remove</div>
+                <div>{{ note?.price | formatPrice:FormatPricePipe.prefixType.NONE }}</div>
+              </button>
+            } @else if (note?.isOwned) {
+              <button routerLink="/collection" class="action-btn large dark button">
+                <div class="button-text-wrap"><i class="fi fi-rr-apps white icon small-icon"></i>In Collection</div>
+              </button>
+            } @else if (note?.seller?.uid === nativeUser?.uid) {
+              <button (click)="toggleEditListing()" class="action-btn large thick-border button">
+                <div class="button-text-wrap"><i class="fi fi-rr-edit icon small-icon"></i>Manage Listing</div>
+              </button>
+            } @else if (note?.status !== Note.NoteStatus.LISTED) {
+              <button disabled class="action-btn large dark button">
+                <div class="button-text-wrap">Unavailable</div>
+                @if (note?.price === 0) {
+                  <div>Free</div>
+                } @else {
+                  <div>{{ note?.price | formatPrice:FormatPricePipe.prefixType.NONE }}</div>
+                }
+              </button>
+            } @else {
+              <button (click)="addCartItem(note?._index, note?._id)" class="action-btn large dark button">
+                <div class="button-text-wrap"><i class="fi fi-rr-shopping-bag-add white icon small-icon"></i>Add to Bag</div>
+                @if (note?.price === 0) {
+                  <div>Free</div>
+                } @else {
+                  <div>{{ note?.price | formatPrice:FormatPricePipe.prefixType.NONE }}</div>
+                }
+              </button>
+            }
+          </div>
+        </div>
+        <div class="item-content large">
+          <div class="item-section large">
+            <h3 class="item-heading">{{ note?.title }}</h3>
+            <div class="item-details-large">
+              <a [routerLink]="['/users', note?.seller?.username]" class="avatar-wrap small-gap link-underline-hover">
+                <img src="{{ note?.seller | getImageUrl }}" loading="lazy" class="avatar small">
+                <p>{{ note?.seller?.username }}</p>
+              </a>
+            </div>
+            <div *ngIf="note?.subjects?.length" class="item-tags-large">
+              @for (subject of note?.subjects; track $index) {
+                <div class="subject-category category">
+                  <div class="category-text">{{ subject }}</div>
+                </div>
+              }
+            </div>
+            <div class="item-rating-wrap-large"><i class="fi fi-sr-document icon mini-icon"></i>
+              <div class="small-text-semi-bold">Note Rating: </div>
+              <div class="item-rating" [style.background]="(note | getRating).backgroundColour">{{ (note | getRating).percentageText }}</div>
+              <div class="small-text">{{ (note | getRating).countText }}</div>
+            </div>
+            <div class="block-info-wrap">
+              <div class="block-info"><i class="fi fi-sr-bags-shopping block-icon"></i>
+                <div class="small-text">{{ note?.purchaseCount }} {{ note?.purchaseCount === 1 ? "Purchase" : "Purchases" }}</div>
+              </div>
+              <div class="block-info"><i class="fi fi-rr-file block-icon"></i>
+                <div class="small-text">{{ note?.pageCount }} {{ note?.pageCount === 1 ? "Page" : "Pages" }}</div>
+              </div>
+              <div class="block-info"><i class="fi fi-rr-calendar-lines block-icon"></i>
+                <div class="small-text">{{ note?.dateCreated?.toLocaleDateString("en-AU", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric"
+                }) }}</div>
+              </div>
+            </div>
+            <p class="paragraph">{{ note?.description }}</p>
+            <div *ngIf="!note?.isOwned" class="features-wrap">
+              <div class="feature">
+                <i class="fi fi-br-restock icon mini-icon"></i>Refundable
+                @if (note?.isRefundAvailable) {
+                  <i class="fi fi-br-check-circle icon mini-icon green"></i>
+                } @else {
+                  <i class="fi fi fi-br-cross-circle icon mini-icon red"></i>
+                }
+              </div>
+              <div class="feature">
+                <i class="fi fi-br-download icon mini-icon"></i>Downloadable
+                @if (note?.isDownloadAvailable) {
+                  <i class="fi fi-br-check-circle icon mini-icon green"></i>
+                } @else {
+                  <i class="fi fi fi-br-cross-circle icon mini-icon red"></i>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div [ngStyle]="{'display': similarNotes.length > 0 ? '' : 'none'}" class="carousel-wrap">
+        <div class="carousel-btn-wrap left">
+          <button #carouselBtnLeft (click)="scrollCarousel('left')" class="button pill-btn">
+            <i class="fi fi-rr-arrow-small-left icon small-icon"></i>
+          </button>
+        </div>
+        <div class="carousel-btn-wrap right">
+          <button #carouselBtnRight (click)="scrollCarousel('right')" class="button pill-btn">
+            <i class="fi fi-rr-arrow-small-right icon small-icon"></i>
+          </button>
+        </div>
+        <div #carousel class="carousel">
+          @for (similarNote of similarNotes; track $index) {
+            <div class="listing">
+              <a [routerLink]="['/notes', similarNote._id]" tabindex="0" class="link-block"></a>
+              <div class="item-thumb"><img src="{{ similarNote | getImageUrl }}" loading="lazy" class="item-cover"></div>
+              <div class="item-wrap">
+                <div class="item-content">
+                  <div class="item-section">
+                    <div class="title item-title">{{ similarNote.title }}</div>
+                    <div class="item-details">
+                      <a [routerLink]="['/users', similarNote.seller?.username]" class="avatar-wrap mini-gap link-underline-hover">
+                        <img src="{{ similarNote.seller | getImageUrl }}" loading="lazy" class="avatar mini">
+                        <p>{{ similarNote.seller?.username }}</p>
+                      </a>&nbsp;· {{ similarNote.dateCreated | formatDate }}
+                    </div>
+                    <div *ngIf="similarNote.subjects && similarNote.subjects.length > 0" class="item-tags">
+                      @for (subject of similarNote.subjects; track $index) {
+                        <div class="subject-category category">
+                          <div class="category-text">{{ subject }}</div>
+                        </div>
+                      }
+                    </div>
+                    <div class="item-info">{{ similarNote.description }}</div>
+                  </div>
+                  <div class="item-section">
+                    <div class="item-rating-wrap"><i class="fi fi-sr-document icon mini-icon"></i>
+                      <div class="item-rating" [style.background]="(similarNote | getRating).backgroundColour">{{ (similarNote | getRating).percentageText }}</div>
+                      <div class="small-text">{{ (similarNote | getRating).countText }}</div>
+                    </div>
+                  </div>
+                </div>
+                <div *ngIf="similarNote.price === 0" class="sale-content">
+                  <div class="sale-price">Free</div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+  @if (note?.samplePdfProperties?.length || note?.isOwned || note?.sellerUid === this.nativeUser?.uid) {
+    <div class="section-separator"></div>
+    <section class="section-regular">
+      <div class="container">
+        <div>
+          <app-note-viewer *ngIf="noteId" class="note-preview" [noteViewerData]="{ isMiniViewer: true }"></app-note-viewer>
+        </div>
+      </div>
+    </section>
+  }
+  <div class="section-separator"></div>
+  <section class="section-regular">
+    <div class="container">
+      <div>
+        <div class="items-header spaced">
+          <h3 class="header-title">Reviews</h3>
+          <div class="sort-form-block">
+            <form (ngSubmit)="serveReviews()">
+              <select [(ngModel)]="reviewsSortBy" (ngModelChange)="serveReviews()" class="dropdown-sort select" name="sortBy">
+                <option value="date-created-desc" selected>Newest</option>
+                <option value="date-created-asc">Oldest</option>
+                <option value="rating-desc">Rating: High to Low</option>
+                <option value="rating-asc">Rating: Low to High</option>
+              </select>
+            </form>
+          </div>
+        </div>
+        <div class="items-reviews">
+          @if (userReview && !isEditUserReview) {
+            <div class="review">
+              <div class="item-wrap-review">
+                <a [routerLink]="['/users', userReview.user?.username]" class="avatar-wrap vertical small-gap link-underline-hover"><img src="{{ userReview.user | getImageUrl }}" loading="lazy" class="avatar">
+                  <p>{{ userReview.user?.username }}</p>
+                </a>
+                <div class="review-content">
+                  <div class="star-wrapper">
+                    <div class="star-icon w-embed"><svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M11.9999 15.8196L7.5098 18.5619L8.73049 13.4439L4.73535 10.0216L9.97945 9.6015L11.9999 4.74316L14.0204 9.6015L19.2653 10.0216L15.2694 13.4439L16.4901 18.5619L11.9999 15.8196Z" [attr.fill]="userReview.rating >= 1 ? 'currentColor' : 'var(--neutral--300)'"></path>
+                    </svg></div>
+                    <div class="star-icon w-embed"><svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M11.9999 15.8196L7.5098 18.5619L8.73049 13.4439L4.73535 10.0216L9.97945 9.6015L11.9999 4.74316L14.0204 9.6015L19.2653 10.0216L15.2694 13.4439L16.4901 18.5619L11.9999 15.8196Z" [attr.fill]="userReview.rating >= 2 ? 'currentColor' : 'var(--neutral--300)'"></path>
+                    </svg></div>
+                    <div class="star-icon w-embed"><svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M11.9999 15.8196L7.5098 18.5619L8.73049 13.4439L4.73535 10.0216L9.97945 9.6015L11.9999 4.74316L14.0204 9.6015L19.2653 10.0216L15.2694 13.4439L16.4901 18.5619L11.9999 15.8196Z" [attr.fill]="userReview.rating >= 3 ? 'currentColor' : 'var(--neutral--300)'"></path>
+                    </svg></div>
+                    <div class="star-icon w-embed"><svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M11.9999 15.8196L7.5098 18.5619L8.73049 13.4439L4.73535 10.0216L9.97945 9.6015L11.9999 4.74316L14.0204 9.6015L19.2653 10.0216L15.2694 13.4439L16.4901 18.5619L11.9999 15.8196Z" [attr.fill]="userReview.rating >= 4 ? 'currentColor' : 'var(--neutral--300)'"></path>
+                    </svg></div>
+                    <div class="star-icon w-embed"><svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M11.9999 15.8196L7.5098 18.5619L8.73049 13.4439L4.73535 10.0216L9.97945 9.6015L11.9999 4.74316L14.0204 9.6015L19.2653 10.0216L15.2694 13.4439L16.4901 18.5619L11.9999 15.8196Z" [attr.fill]="userReview.rating >= 5 ? 'currentColor' : 'var(--neutral--300)'"></path>
+                    </svg></div>
+                  </div>
+                  <div class="review-date">{{ userReview.dateUpdated | formatDate }}</div>
+                  <div class="review-text">{{ userReview.review }}</div>
+                </div>
+              </div>
+              <div class="inner-corner medium-corner">
+                <button (click)="toggleEditUserReview()" class="button pill-btn small"><p class="text-fine-print">Edit</p></button>
+              </div>
+            </div>
+          } @else {
+            <form [class.disabled]="note?.seller?.uid === nativeUser?.uid || !note?.isPurchased" class="review write" id="writeReview" #form="ngForm" (ngSubmit)="isEditUserReview ? updateReview(form) : addReview(form)" novalidate>
+              <div class="disabled-overlay" *ngIf="note?.seller?.uid === nativeUser?.uid || !note?.isPurchased">
+                @if (note?.seller?.uid === nativeUser?.uid) {
+                  You can't review your own listings.
+                } @else {
+                  Purchase item to leave a review.
+                }
+              </div>
+              <div class="item-wrap-review">
+                <div class="review-form">
+                  <h6>Write a Review</h6>
+                  <div class="input-wrap">
+                    <textarea [disabled]="note?.seller?.uid === nativeUser?.uid || !note?.isPurchased" [(ngModel)]="writeReview" [ngClass]="{'error': (form['submitted'] && form.controls['review'].invalid)}" required name="review" minlength="1" maxlength="2000" placeholder="What did you like or dislike about this note?" autocomplete="off" class="review-textarea text-area" [pattern]="nonEmptyRegex" type="text"></textarea>
+                    <div class="form-error-text" *ngIf="form['submitted'] && form.controls['review'].invalid">
+                      @if (form.controls['review'].errors?.['required']) {
+                        *Review is required.
+                      } @else {
+                        *Review is invalid.
+                      }
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="review-label-wrap">
+                <div class="item-rating-wrap"><i class="fi fi-sr-document icon mini-icon"></i>
+                  <div class="small-text-semi-bold">Note Rating:</div>
+                </div>
+                <div class="input-wrap">
+                  <div class="review-rating-wrap">
+                    <label for="1">
+                      <input [disabled]="note?.seller?.uid === nativeUser?.uid || !note?.isPurchased" [(ngModel)]="writeRating" (click)="writeRating === 1 ? writeRating = undefined : {}" required style="display: none" type="radio" [value]="1" name="rating" id="1">
+                      <div class="star-icon rating"><svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M11.9999 15.8196L7.5098 18.5619L8.73049 13.4439L4.73535 10.0216L9.97945 9.6015L11.9999 4.74316L14.0204 9.6015L19.2653 10.0216L15.2694 13.4439L16.4901 18.5619L11.9999 15.8196Z" [attr.fill]="writeRating && writeRating >= 1 ? 'var(--orange--base)' : 'var(--neutral--300)'"></path>
+                      </svg></div>
+                    </label>
+                    <label for="2">
+                      <input [disabled]="note?.seller?.uid === nativeUser?.uid || !note?.isPurchased" [(ngModel)]="writeRating" (click)="writeRating === 2 ? writeRating = undefined : {}" required style="display: none" type="radio" [value]="2" name="rating" id="2">
+                      <div class="star-icon rating"><svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M11.9999 15.8196L7.5098 18.5619L8.73049 13.4439L4.73535 10.0216L9.97945 9.6015L11.9999 4.74316L14.0204 9.6015L19.2653 10.0216L15.2694 13.4439L16.4901 18.5619L11.9999 15.8196Z" [attr.fill]="writeRating && writeRating >= 2 ? 'var(--orange--base)' : 'var(--neutral--300)'"></path>
+                      </svg></div>
+                    </label>
+                    <label for="3">
+                      <input [disabled]="note?.seller?.uid === nativeUser?.uid || !note?.isPurchased" [(ngModel)]="writeRating" (click)="writeRating === 3 ? writeRating = undefined : {}" required style="display: none" type="radio" [value]="3" name="rating" id="3">
+                      <div class="star-icon rating"><svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M11.9999 15.8196L7.5098 18.5619L8.73049 13.4439L4.73535 10.0216L9.97945 9.6015L11.9999 4.74316L14.0204 9.6015L19.2653 10.0216L15.2694 13.4439L16.4901 18.5619L11.9999 15.8196Z" [attr.fill]="writeRating && writeRating >= 3 ? 'var(--orange--base)' : 'var(--neutral--300)'"></path>
+                      </svg></div>
+                    </label>
+                    <label for="4">
+                      <input [disabled]="note?.seller?.uid === nativeUser?.uid || !note?.isPurchased" [(ngModel)]="writeRating" (click)="writeRating === 4 ? writeRating = undefined : {}" required style="display: none" type="radio" [value]="4" name="rating" id="4">
+                      <div class="star-icon rating"><svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M11.9999 15.8196L7.5098 18.5619L8.73049 13.4439L4.73535 10.0216L9.97945 9.6015L11.9999 4.74316L14.0204 9.6015L19.2653 10.0216L15.2694 13.4439L16.4901 18.5619L11.9999 15.8196Z" [attr.fill]="writeRating && writeRating >= 4 ? 'var(--orange--base)' : 'var(--neutral--300)'"></path>
+                      </svg></div>
+                    </label>
+                    <label for="5">
+                      <input [disabled]="note?.seller?.uid === nativeUser?.uid || !note?.isPurchased" [(ngModel)]="writeRating" (click)="writeRating === 5 ? writeRating = undefined : {}" required style="display: none" type="radio" [value]="5" name="rating" id="5">
+                      <div class="star-icon rating"><svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M11.9999 15.8196L7.5098 18.5619L8.73049 13.4439L4.73535 10.0216L9.97945 9.6015L11.9999 4.74316L14.0204 9.6015L19.2653 10.0216L15.2694 13.4439L16.4901 18.5619L11.9999 15.8196Z" [attr.fill]="writeRating && writeRating >= 5 ? 'var(--orange--base)' : 'var(--neutral--300)'"></path>
+                      </svg></div>
+                    </label>
+                  </div>
+                  <div class="form-error-text" *ngIf="form['submitted'] && form.controls['rating'].invalid">
+                    @if (form.controls['rating'].errors?.['required']) {
+                      *Rating is required.
+                    } @else {
+                      *Rating is invalid.
+                    }
+                  </div>
+                </div>
+              </div>
+              <div style="z-index: unset" class="item-actions">
+                <button *ngIf="isEditUserReview" (click)="deleteReview()" type="button" class="button">
+                  <div class="button-text-wrap"><i class="fi fi-br-trash icon mini-icon"></i></div>
+                </button>
+                <button [disabled]="isLoading" form="writeReview" type="submit" class="button dark action-btn">
+                  @if (isLoading) {
+                    <div class="button-text-wrap">Loading...</div>
+                  } @else {
+                    <div class="button-text-wrap">{{ isEditUserReview ? "Update review" : "Write review" }}</div>
+                    <i class="fi fi-sr-comment-alt-dots icon small-icon white"></i>
+                  }
+                </button>
+              </div>
+              <div *ngIf="isEditUserReview" class="inner-corner medium-corner">
+                <button type="button" (click)="toggleEditUserReview()" class="button pill-btn small"><p class="text-fine-print">Close</p></button>
+              </div>
+            </form>
+          }
+          @for (review of reviews; track $index) {
+            <div class="review" [class.ai]="review.isAi">
+              <div class="item-wrap-review">
+                @if (review.isAi){
+                  <div class="avatar-wrap vertical small-gap">
+                    <img src="/ai_logo.svg" loading="lazy" class="avatar">
+                    <div class="avatar-wrap mini-gap">Assistant&nbsp;<i class="fi fi-sr-shield-trust verified-badge-small"></i></div>
+                    <div class="text-fine-print">Assistant may not always be accurate.</div>
+                  </div>
+                } @else {
+                  <a [routerLink]="['/users', review.user?.username]" class="avatar-wrap vertical small-gap link-underline-hover"><img src="{{ review.user | getImageUrl }}" loading="lazy" class="avatar">
+                    <p>{{ review.user?.username }}</p>
+                  </a>
+                }
+                <div class="review-content">
+                  <div class="star-wrapper">
+                    <div class="star-icon w-embed"><svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M11.9999 15.8196L7.5098 18.5619L8.73049 13.4439L4.73535 10.0216L9.97945 9.6015L11.9999 4.74316L14.0204 9.6015L19.2653 10.0216L15.2694 13.4439L16.4901 18.5619L11.9999 15.8196Z" [attr.fill]="review.rating >= 1 ? 'currentColor' : 'var(--neutral--300)'"></path>
+                    </svg></div>
+                    <div class="star-icon w-embed"><svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M11.9999 15.8196L7.5098 18.5619L8.73049 13.4439L4.73535 10.0216L9.97945 9.6015L11.9999 4.74316L14.0204 9.6015L19.2653 10.0216L15.2694 13.4439L16.4901 18.5619L11.9999 15.8196Z" [attr.fill]="review.rating >= 2 ? 'currentColor' : 'var(--neutral--300)'"></path>
+                    </svg></div>
+                    <div class="star-icon w-embed"><svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M11.9999 15.8196L7.5098 18.5619L8.73049 13.4439L4.73535 10.0216L9.97945 9.6015L11.9999 4.74316L14.0204 9.6015L19.2653 10.0216L15.2694 13.4439L16.4901 18.5619L11.9999 15.8196Z" [attr.fill]="review.rating >= 3 ? 'currentColor' : 'var(--neutral--300)'"></path>
+                    </svg></div>
+                    <div class="star-icon w-embed"><svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M11.9999 15.8196L7.5098 18.5619L8.73049 13.4439L4.73535 10.0216L9.97945 9.6015L11.9999 4.74316L14.0204 9.6015L19.2653 10.0216L15.2694 13.4439L16.4901 18.5619L11.9999 15.8196Z" [attr.fill]="review.rating >= 4 ? 'currentColor' : 'var(--neutral--300)'"></path>
+                    </svg></div>
+                    <div class="star-icon w-embed"><svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M11.9999 15.8196L7.5098 18.5619L8.73049 13.4439L4.73535 10.0216L9.97945 9.6015L11.9999 4.74316L14.0204 9.6015L19.2653 10.0216L15.2694 13.4439L16.4901 18.5619L11.9999 15.8196Z" [attr.fill]="review.rating >= 5 ? 'currentColor' : 'var(--neutral--300)'"></path>
+                    </svg></div>
+                  </div>
+                  <div class="review-date">{{ review.dateUpdated | formatDate }}</div>
+                  <div class="review-text">{{ review.review }}</div>
+                </div>
+              </div>
+              <div class="show-more-wrap">
+                <button (click)="toggleReview(review)" class="button pill-btn small"><p class="text-fine-print">Expand</p></button>
+              </div>
+            </div>
+          }
+        </div>
+        <div class="items-footer spaced">
+          @if (reviewsIsLoadMoreEnabled) {
+            <button (click)="serveReviews(reviews[reviews.length -1].sort)" class="pill-btn dark small button">
+              <div class="small-text button-text-wrap">Load More</div>
+            </button>
+          } @else {
+            <p class="text-fine-print align-center">You've reached the end. No more reviews beyond this point.</p>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+}

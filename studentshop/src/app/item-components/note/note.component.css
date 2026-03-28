@@ -1,0 +1,30 @@
+/********HEADER SECTION********/
+
+/********CONTENTS SECTION********/
+.note-preview {
+  display: block;
+  height: 60vh;
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid var(--neutral--200);
+  overflow: hidden;
+}
+
+.features-wrap {
+  margin-top: 10px;
+  grid-column-gap: 30px;
+  grid-row-gap: 10px;
+  flex-direction: row;
+  align-items: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.feature {
+  display: flex;
+  flex-direction: row;
+  grid-gap: 5px;
+  font-weight: 500;
+  align-items: center;
+}
+/********************************/

@@ -1,0 +1,247 @@
+<h3 class="settings-heading" xmlns="http://www.w3.org/1999/html">Schools</h3>
+<div *ngIf="errorMessage" class="overview info-message">
+  <div class="overview-left">
+    <i class="fi fi-rr-cross-circle icon small-icon"></i>
+    <div class="label-wrap">
+      <p>{{ errorMessage }}</p>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="loading-bar"></div>
+  </div>
+  @if (errorMessage) {
+    <app-page-not-found></app-page-not-found>
+  } @else {
+    @if (authenticationService.isLoggedIn && [NativeUser.AccountType.ADMIN, NativeUser.AccountType.STAFF].includes(nativeUser?.accountType || '')) {
+      <div class="grid-container">
+        <div class="card-section">
+          <div class="overview">
+            <div class="overview-span">
+              <div class="table-wrap">
+                <table class="unlimited-lines compact flush">
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">ID:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">{{ school?._id }}</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">ACARA ID:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">{{ school?.acaraId }}</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Name:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">{{ school?.name }}</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Sector:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">{{ school?.sector }}</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Status:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">{{ school?.status }}</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Locality:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">{{ school?.locality }}</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Region:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">{{ school?.region }}</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Postcode:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">{{ school?.postcode }}</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Coordinates:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="overview small">
+                          <div class="overview-span">
+                            <div class="table-wrap">
+                              <table class="unlimited-lines compact flush">
+                                <tr>
+                                  <th>
+                                    <div class="table-content-wrap content-align-left">
+                                      <div class="table-text">Latitude:</div>
+                                    </div>
+                                  </th>
+                                  <td>
+                                    <div class="table-content-wrap content-align-right">
+                                      <div class="table-text">{{ school?.coordinates?.lat }}</div>
+                                    </div>
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <th>
+                                    <div class="table-content-wrap content-align-left">
+                                      <div class="table-text">Longitude:</div>
+                                    </div>
+                                  </th>
+                                  <td>
+                                    <div class="table-content-wrap content-align-right">
+                                      <div class="table-text">{{ school?.coordinates?.lon }}</div>
+                                    </div>
+                                  </td>
+                                </tr>
+                              </table>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Website:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        @if(school?.websiteUrl) {
+                          <a [href]="school?.websiteUrl" class="table-text link-underline-hover">{{ school?.websiteUrl }}</a>
+                        } @else {
+                          <div class="table-text">N/A</div>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                  <tr *ngIf="school?.acaraId !== school?.parentCampus?.acaraId" >
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Parent Campus:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <a [routerLink]="['/admin/schools', school?.parentCampus?._id]" class="table-text link-underline-hover">{{ school?.parentCampus }}</a>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Date Created:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">
+                          {{ school?.dateCreated?.toLocaleString("en-AU", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: true
+                        }) }}
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Date Updated:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">
+                          {{ school?.dateUpdated?.toLocaleString("en-AU", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: true
+                        }) }}
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    } @else {
+      <div class="card-section">
+        <div class="empty-message-wrap">
+          <p class="footer-text"><a (click)="toggleLogin()" class="link-underline-hover pink">Log in</a> as an administrator/staff to view admin pages.</p>
+        </div>
+      </div>
+    }
+  }
+</div>

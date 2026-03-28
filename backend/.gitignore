@@ -1,0 +1,9 @@
+# Node
+/node_modules
+npm-debug.log
+yarn-error.log
+
+# Credentials
+/.env
+/studentshop-becfb-firebase-adminsdk-2w7y1-ea579b6b75.json
+/dev-studentshop-firebase-adminsdk-fbsvc-1763727449.json

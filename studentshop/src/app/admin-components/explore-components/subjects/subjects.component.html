@@ -1,0 +1,129 @@
+<h3 class="settings-heading">Subjects</h3>
+<div *ngIf="errorMessage" class="overview info-message">
+  <div class="overview-left">
+    <i class="fi fi-rr-cross-circle icon small-icon"></i>
+    <div class="label-wrap">
+      <p>{{ errorMessage }}</p>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-section">
+    @if (authenticationService.isLoggedIn && [NativeUser.AccountType.ADMIN, NativeUser.AccountType.STAFF].includes(nativeUser?.accountType || '')) {
+      <form class="overview" id="filter" #form="ngForm" (ngSubmit)="serveSubjects()" novalidate>
+        <div class="overview-left filters large">
+          <div class="input-wrap">
+            <label>Name&nbsp;/&nbsp;Certificate</label>
+            <input [(ngModel)]="searchQuery" required name="subjectSearchQuery" autocomplete="subjectSearchQuery" class="form-field input" placeholder="Enter a name or certificate" type="text">
+          </div>
+          <div class="input-wrap">
+            <label>ID*</label>
+            <input [(ngModel)]="filters._id" required name="subjectId" autocomplete="subjectId" class="form-field input" placeholder="Enter a subject ID" type="text">
+          </div>
+        </div>
+        <div class="overview-right">
+          <div class="item-actions no-stretch">
+            <select [(ngModel)]="sortBy" class="dropdown-sort select" name="sortBy">
+              <option value="relevance">Relevance</option>
+              <option value="date-created-desc">Date Created: Newest</option>
+              <option value="date-created-asc">Date Created: Oldest</option>
+              <option value="date-updated-desc">Date Updated: Newest</option>
+              <option value="date-updated-asc">Date Updated: Oldest</option>
+            </select>
+            <button type="submit" class="action-btn button pill-btn dark">
+              <div class="button-text-wrap"><i class="fi fi-rr-search icon mini-icon white"></i>Search</div>
+            </button>
+            <button (click)="clearForm(form)" type="button" class="button circle-btn small">
+              <i class="fi fi-rr-cross icon mini-icon"></i>
+            </button>
+          </div>
+        </div>
+      </form>
+      <div class="item-actions">
+        <button (click)="toggleAddSubjectAdmin()" class="action-btn button pill-btn">
+          <div class="button-text-wrap"><i class="fi fi-rr-plus icon mini-icon"></i>Add</div>
+        </button>
+      </div>
+      @if (isLoading) {
+        <div class="loading-container">
+          <div class="loading-bar"></div>
+        </div>
+      } @else {
+        <div class="menu-separator"></div>
+      }
+      @if (subjects.length > 0) {
+        <div class="table-wrap">
+          <table class="compact">
+            <tr>
+              <th class="table-link-cell"></th>
+              <th><div class="table-content-wrap"><div class="table-text">Name</div></div></th>
+              <th><div class="table-content-wrap"><div class="table-text">Certificate</div></div></th>
+              <th><div class="table-content-wrap"><div class="table-text">Date Created</div></div></th>
+              <th><div class="table-content-wrap"><div class="table-text">Date Updated</div></div></th>
+              <th></th>
+            </tr>
+            @for (subject of subjects; track $index) {
+              <tr class="table-link">
+                <td class="table-link-cell">
+                  <a [routerLink]="['/admin/subjects', subject._id]" tabindex="0" class="link-block"></a>
+                </td>
+                <td>
+                  <div class="table-content-wrap content-align-left">
+                    <div class="table-text">{{ subject?.name }}</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap">
+                    <div class="table-text">{{ subject?.certificate ? subject?.certificate : 'N/A' }}</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap">
+                    <div class="table-text">{{ subject.dateCreated.toLocaleDateString("en-AU", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric"
+                    }) }}</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap">
+                    <div class="table-text">{{ subject.dateUpdated.toLocaleDateString("en-AU", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric"
+                    }) }}</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap">
+                    <button (click)="toggleContextMenu($event, subject)" type="button" class="button no-border circle-btn small transparent">
+                      <i class="fi fi-rs-menu-dots-vertical icon mini-icon"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </table>
+        </div>
+        <div class="items-footer">
+          @if (isLoadMoreEnabled) {
+            <button (click)="serveSubjects(subjects[subjects.length -1].sort)" class="pill-btn small button">
+              <div class="small-text button-text-wrap">Load More</div>
+            </button>
+          } @else {
+            <p class="text-fine-print align-center">You've reached the end. No more reviews beyond this point.</p>
+          }
+        </div>
+      } @else {
+        <div class="empty-message-wrap">
+          <p class="footer-text">Search returned no results.</p>
+        </div>
+      }
+    } @else {
+      <div class="empty-message-wrap">
+        <p class="footer-text"><a (click)="toggleLogin()" class="link-underline-hover pink">Log in</a> as an administrator/staff to view admin pages.</p>
+      </div>
+    }
+  </div>
+</div>

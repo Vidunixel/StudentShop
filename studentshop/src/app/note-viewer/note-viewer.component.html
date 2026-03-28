@@ -1,0 +1,138 @@
+@if (isError) {
+  <app-page-not-found></app-page-not-found>
+} @else {
+  <div #noteViewerContainer (mouseenter)="isNoteViewerContainerHovered = true" (mouseleave)="isNoteViewerContainerHovered = false" (wheel)="onWheelScrollNoteViewerContainer($event)" class="note-viewer-container">
+    <div class="top-toolbar">
+      <div class="toolbar-actions left">
+        <button [disabled]="!isSidebarEnabled" [class.selected]="isSidebarOpen" (click)="toggleSidebar()" title="Contents" class="button no-border transparent">
+          <i class="fi fi-rr-menu-burger icon mini-icon"></i>
+        </button>
+      </div>
+      <div class="toolbar-actions">
+      </div>
+      <div class="toolbar-actions right spaced">
+        <button *ngIf="!(!this.noteViewerData.isMiniViewer && !note?.isDownloadAvailable)" (click)="toggleContextMenu($event)" class="button no-border mobile-actions-btn">
+          <i class="fi fi-rs-menu-dots icon mini-icon"></i>
+        </button>
+        <button *ngIf="noteViewerData.isMiniViewer" [routerLink]="['/notes', noteId, 'view']" class="button pill-btn mobile-hidden">
+          <div class="button-text-wrap">
+            View in full
+            <i class="fi fi-rr-document icon mini-icon"></i>
+          </div>
+        </button>
+        @if (note && isSample && isItemInCart(note._index, note._id)) {
+          <button (click)="removeCartItem(note._index, note._id)" class="button pill-btn mobile-hidden">
+            <div class="button-text-wrap"><i class="fi fi-rr-bag-shopping-minus icon mini-icon"></i>Remove</div>
+          </button>
+        } @else if (note && isSample) {
+          <button (click)="addCartItem(note._index, note._id)" class="button pill-btn dark mobile-hidden">
+            <div class="button-text-wrap"><i class="fi fi-rr-shopping-bag-add white icon mini-icon"></i>Add to Bag</div>
+          </button>
+        }
+        <button *ngIf="!isSample && (note?.isDownloadAvailable || nativeUser?.uid === note?.sellerUid)" [disabled]="isDownloadLoading" (click)="confirmDownload()" class="button pill-btn no-border dark mobile-hidden">
+          <div class="button-text-wrap">
+            @if (isDownloadLoading) {
+              Loading...
+            } @else {
+              Download
+              <i class="fi fi-rr-arrow-alt-circle-down icon mini-icon white"></i>
+            }
+          </div>
+        </button>
+        <button [class.selected]="isFindFieldOpen" (click)="toggleFindForm()" title="Find (Ctrl/⌘ + F)" class="button no-border transparent">
+          <i class="fi fi-rr-search-alt icon mini-icon"></i>
+        </button>
+      </div>
+    </div>
+    <div class="note-viewer-wrap">
+      <div *ngIf="isSample && isSampleBannerEnabled && !isLoading" class="overview info-message banner">
+        <div class="overview-middle">
+          <div class="label-wrap">
+            <p class="small-text">This is just a preview. Purchase this note to access all of its content.</p>
+          </div>
+        </div>
+        <div class="overview-right">
+          <button (click)="isSampleBannerEnabled = false" class="button circle-btn no-border transparent">
+            <i class="fi fi-rr-cross icon micro-icon"></i>
+          </button>
+        </div>
+      </div>
+      <form tabindex="0" #findForm (focusin)="focusOnNestedInput($event)" (ngSubmit)="this.findMatches.length > 0 ? onNextFindResult() : findInNote()" title="Find (Ctrl/⌘ + F)" class="find-form">
+        <div class="combobox-wrap find-field-wrap">
+          <input [disabled]="isFindLoading" #findField [(ngModel)]="currentFindQuery" (ngModelChange)="clearFinds()" class="input nested-form-field find-field" name="find-field" placeholder="Find in note..." autocomplete="off" type="text">
+          <div class="find-field-trailing-actions">
+            <button *ngIf="isFindLoading || currentFindQuery.length > 0" (click)="clearFindQuery()" type="button" class="button circle-btn no-border transparent mini find-field-action"><i class="fi fi-rr-cross icon nano-icon"></i></button>
+          </div>
+          <div class="find-field-trailing-actions">
+            <button [disabled]="isFindLoading || findMatches.length === 0" (click)="onPrevFindResult()" type="button" class="button no-border transparent find-field-action">
+              <i class="fi fi-rr-angle-small-up icon mini-icon grey"></i>
+            </button>
+            <button [disabled]="isFindLoading || findMatches.length === 0" (click)="onNextFindResult()" type="button" class="button no-border transparent find-field-action">
+              <i class="fi fi-rr-angle-small-down icon mini-icon grey"></i>
+            </button>
+          </div>
+          <div class="find-field-trailing-actions">
+            @if (this.isFindLoading || (this.lastQueriedFindQuery !== this.currentFindQuery)) {
+              <p class="text-fine-print find-field-action">-- / --</p>
+            } @else {
+              <p class="text-fine-print find-field-action">{{currentFindIndex === null ? 0 : currentFindIndex + 1}} / {{findMatches.length}}</p>
+            }
+            <button [disabled]="isFindLoading" type="submit" class="button no-border">
+              <i class="fi fi-rr-search icon mini-icon grey"></i>
+            </button>
+          </div>
+          <div *ngIf="isFindLoading" class="skeleton-gradient-container">
+            <div class="skeleton-gradient"></div>
+          </div>
+        </div>
+      </form>
+      <div [innerHTML]="htmlContent" class="note-viewer"></div>
+      <div #toolbarWrap class="toolbar-wrap">
+        <button *ngIf="!isToolbarOpen" (click)="toggleToolbar(true)" class="button no-border circle-btn no-margin open-toolbar-btn">
+          <i class="fi fi-rr-angle-small-up icon small-icon"></i>
+        </button>
+        <div #toolbar class="toolbar">
+          <div class="toolbar-actions">
+            <button (click)="zoomOut()" title="Zoom out (Ctrl/⌘ + Minus)" class="button no-border transparent">
+              <i class="fi fi-br-minus icon micro-icon"></i>
+            </button>
+            <button  (click)="zoomIn()" title="Zoom in (Ctrl/⌘ + Plus)" class="button no-border transparent">
+              <i class="fi fi-br-plus icon micro-icon"></i>
+            </button>
+          </div>
+          <div class="toolbar-section-separator"></div>
+          <form (ngSubmit)="changePage()" title="Change page" class="toolbar-actions">
+            <input [(ngModel)]="currentPageNumber" (focus)="selectAll($event)" (blur)="setCurrentPageNumber()" class="small input toolbar-page-field" name="currentPageNumber" autocomplete="off" type="number">
+            <div class="toolbar-page-text">of {{ totalPageCount }}</div>
+          </form>
+          <div class="toolbar-section-separator"></div>
+          <div class="toolbar-actions">
+            <button (click)="isFitToPageEnabled ? fitToPage() : fitToWidth()" title="{{ isFitToPageEnabled ? 'Fit to page (Ctrl/⌘ + \\)' : 'Fit to width (Ctrl/⌘ + \\)' }}" class="button no-border transparent">
+              @if (isFitToPageEnabled) {
+                <i class="fi fi-rr-expand icon mini-icon"></i>
+              } @else {
+                <i class="fi fi-rr-arrow-up-right-and-arrow-down-left-from-center icon mini-icon"></i>
+              }
+            </button>
+          </div>
+          <div class="toolbar-section-separator"></div>
+          <div class="toolbar-actions">
+            <button (click)="toggleToolbar(false)" class="button no-border transparent">
+              <i class="fi fi-rr-angle-small-down icon mini-icon"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div #horizontalScrollbarWrap class="scrollbar-wrap horizontal-scrollbar-wrap">
+        <div #horizontalScrollbarContainer class="scrollbar-container horizontal-scrollbar-container">
+          <div #horizontalScrollbar (mousedown)="scrollHorizontally($event)" class="scrollbar-thumb horizontal-scrollbar-thumb"></div>
+        </div>
+      </div>
+      <div #verticalScrollbarWrap class="scrollbar-wrap vertical-scrollbar-wrap">
+        <div #verticalScrollbarContainer class="scrollbar-container vertical-scrollbar-container">
+          <div #verticalScrollbar (mousedown)="scrollVertically($event)" class="scrollbar-thumb vertical-scrollbar-thumb"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+}

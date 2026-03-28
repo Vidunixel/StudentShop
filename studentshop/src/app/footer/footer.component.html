@@ -1,0 +1,68 @@
+<div class="section-separator"></div>
+<section class="footer-section">
+  <div class="container">
+    <div class="footer-wrap">
+      <div class="footer-area">
+        <div class="footer-link-column">
+          <a href="index.html" aria-current="page"><img ngSrc="/logo_wide_grey.png" alt="Brand" class="logo-footer" width="120" height="20"></a>
+        </div>
+      </div>
+      <div class="footer-area">
+        <div class="footer-link-column">
+          <div class="subheading">Pages</div>
+          <ul class="footer-list">
+            <li><a [routerLink]="['/']" class="link-underline-hover grey">Home</a></li>
+            <li><a (click)="toggleSell()" class="link-underline-hover grey">Sell</a></li>
+            <li><a [routerLink]="['/notes']" class="link-underline-hover grey">Notes</a></li>
+            <li><a [routerLink]="['/collection']" class="link-underline-hover grey">Collection</a></li>
+            <li><a *ngIf="[NativeUser.AccountType.ADMIN, NativeUser.AccountType.STAFF].includes(nativeUser?.accountType || '')" [routerLink]="['/admin']" class="link-underline-hover grey">Admin Management</a></li>
+          </ul>
+        </div>
+        <div class="footer-link-column">
+          <div class="subheading">Account</div>
+          <ul class="footer-list">
+            <li><a [routerLink]="['/account', 'profile']" class="link-underline-hover grey">Profile</a></li>
+            <li><a [routerLink]="['/account', 'earnings']" class="link-underline-hover grey">Earnings</a></li>
+            <li><a [routerLink]="['/account', 'purchases']" class="link-underline-hover grey">Purchases</a></li>
+            <li><a [routerLink]="['/account', 'listings']" class="link-underline-hover grey">Manage Listings</a></li>
+            @if (this.authenticationService.isLoggedIn) {
+              <li><a (click)="logout()" class="link-underline-hover grey">Log out</a></li>
+            } @else {
+              <li><a (click)="toggleLogin()" class="link-underline-hover grey">Log in</a></li>
+            }
+          </ul>
+        </div>
+        <div class="footer-link-column">
+          <div class="subheading">Support & Legal</div>
+          <ul class="footer-list">
+            <li><a [routerLink]="['/help']" class="link-underline-hover grey">Help</a></li>
+            <li><a [routerLink]="['/refund-policy']" class="link-underline-hover grey">Refund Policy</a></li>
+            <li><a [routerLink]="['/terms-of-service']" class="link-underline-hover grey">Terms of Service</a></li>
+            <li><a [routerLink]="['/privacy-policy']" class="link-underline-hover grey">Privacy Policy</a></li>
+          </ul>
+        </div>
+        <div class="footer-link-column">
+          <div class="subheading">Attributions</div>
+          <ul class="footer-list">
+            <li><a target="_blank" rel="noopener noreferrer" class="link-underline-hover grey" href="https://www.flaticon.com/uicons">Uicons by Flaticon</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-area">
+        <div class="footer-link-column">
+          <div class="footer-social-links">
+            <a href="https://www.instagram.com/studentshopau" target="_blank">
+              <i class="fi fi-brands-instagram icon medium-icon social"></i>
+            </a>
+            <a href="https://www.tiktok.com/@studentshopau" target="_blank">
+              <i class="fi fi-brands-tik-tok icon medium-icon social"></i>
+            </a>
+            <a href="https://www.facebook.com/people/StudentShop/61584640292660" target="_blank">
+              <i class="fi fi-brands-facebook icon medium-icon social"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

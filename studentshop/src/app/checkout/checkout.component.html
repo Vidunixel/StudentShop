@@ -1,0 +1,80 @@
+<div class="section-regular">
+  <div class="container">
+    <div>
+      <div class="items-header spaced">
+        <h3 class="header-title">Bag</h3>
+      </div>
+      <div class="cart-wrap contents">
+        <div class="cart">
+          @if (detailedCart.length === 0) {
+            <div class="empty-message-wrap">
+              <p class="footer-text">Your bag is empty. Add an item to get started.</p>
+            </div>
+          } @else {
+            @for (detailedItem of detailedCart; track $index) {
+              <div *ngIf="$index !== 0" class="menu-separator"></div>
+              @switch(detailedItem._index) {
+                @case ("notes") {
+                  <div class="menu vertical-listing small-listing">
+                    <a [routerLink]="['/notes', detailedItem._id]" class="item-thumb"><img src="{{ detailedItem | getImageUrl }}" loading="lazy" class="item-cover small"></a>
+                    <div class="item-wrap">
+                      <div class="item-content">
+                        <div class="item-section">
+                          <a [routerLink]="['/notes', detailedItem._id]" class="title item-title link-underline-hover">{{ detailedItem.title }}</a>
+                          <div class="item-details">
+                            <a [routerLink]="['/users', detailedItem.seller?.username]" class="avatar-wrap mini-gap link-underline-hover">
+                              <img src="{{ detailedItem.seller | getImageUrl }}" loading="lazy" class="avatar mini">
+                              <p>{{ detailedItem.seller?.username }}</p>
+                            </a>&nbsp;· {{ detailedItem.dateUpdated.getFullYear() }}
+                          </div>
+                          <div class="item-info">{{ detailedItem.description }}</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="overview-right">
+                      <button title="Remove" (click)="removeCartItem(detailedItem, detailedItem._index, detailedItem._id)" class="button no-border no-margin transparent">
+                        <i class="fi fi-rr-bag-shopping-minus icon small-icon"></i>
+                      </button>
+                      <p class="item-price">${{detailedItem.price}}</p>
+                    </div>
+                  </div>
+                }
+              }
+            }
+          }
+        </div>
+        <div class="checkout-card">
+          <div class="totals-wrap">
+            <div class="sub-totals">
+              <div class="total">
+                <p>Items:</p>
+                <p>{{ getCartSubtotal() | formatPrice:FormatPricePipe.prefixType.NONE }}</p>
+              </div>
+            </div>
+            <div class="total">
+              <div class="total-label">Total:<p class="text-fine-print">(Including GST)</p></div>
+              <p class="total-price">AUD {{ getCartSubtotal() | formatPrice:FormatPricePipe.prefixType.NONE }}</p>
+            </div>
+          </div>
+          <div [ngStyle]="{'display': authenticationService.isLoggedIn && isEmailVerified && getCartSubtotal() ? '' : 'none'}" id="paypal-button-container" class="paypal-button-container"></div>
+          @if (!authenticationService.isLoggedIn) {
+            <div class="empty-message-wrap">
+              <p class="footer-text"><a (click)="toggleLogin()" class="link-underline-hover pink">Log in</a> or <a (click)="toggleSignup()" class="link-underline-hover pink">sign up</a> to complete purchase.</p>
+            </div>
+          } @else if (!isEmailVerified) {
+            <div class="empty-message-wrap">
+              <p>Please verify your email address <a routerLink="/account/security" class="link-underline-hover pink">here</a>.</p>
+            </div>
+          } @else if (detailedCart.length > 0 && getCartSubtotal() === 0) {
+            <div class="item-actions">
+              <button (click)="createFreeOrder()" class="button action-btn pill-btn dark large">
+                <div class="button-text-wrap">Get Free Items</div>
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

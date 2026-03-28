@@ -1,0 +1,529 @@
+<h3 class="settings-heading" xmlns="http://www.w3.org/1999/html">Purchases</h3>
+<div *ngIf="errorMessage" class="overview info-message">
+  <div class="overview-left">
+    <i class="fi fi-rr-cross-circle icon small-icon"></i>
+    <div class="label-wrap">
+      <p>{{ errorMessage }}</p>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="loading-bar"></div>
+  </div>
+  @if (errorMessage) {
+    <app-page-not-found></app-page-not-found>
+  } @else {
+    @if (authenticationService.isLoggedIn && [NativeUser.AccountType.ADMIN, NativeUser.AccountType.STAFF].includes(nativeUser?.accountType || '')) {
+      <div class="grid-container">
+        <div class="card-section">
+          <div class="overview">
+            <div class="overview-span">
+              <div class="table-wrap">
+                <table class="unlimited-lines compact flush">
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">ID:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">{{ purchase?._id }}</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">User:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <a [routerLink]="['/admin/users', purchase?.userUid]" class="table-text link-underline-hover">{{ purchase?.user?.username }}</a>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Seller:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <a [routerLink]="['/admin/users', purchase?.sellerUid]" class="table-text link-underline-hover">{{ purchase?.seller?.username }}</a>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Item:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        @switch (purchase?.detailedItem?._index) {
+                          @case (Note.indexName) {
+                            <a [routerLink]="['/admin/notes', purchase?.detailedItem?._id]" class="table-text link-underline-hover"> {{ purchase?.detailedItem?.title }} </a>
+                          }
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Order ID:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">{{ purchase?.orderId ? purchase?.orderId : 'N/A' }}</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Status:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="item-details">
+                          <div class="category status" [style.background-color]="(purchase | getStatus).backgroundColour">
+                            <div class="category-text status" [style.color]="(purchase | getStatus).textColour">
+                              {{ (purchase | getStatus).text }}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Price:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="overview small">
+                          <div class="overview-span">
+                            <div class="table-wrap">
+                              <table class="unlimited-lines compact flush">
+                                <tr>
+                                  <th>
+                                    <div class="table-content-wrap content-align-left">
+                                      <div class="table-text">Unit Amount:</div>
+                                    </div>
+                                  </th>
+                                  <td>
+                                    <div class="table-content-wrap content-align-right">
+                                      <div class="overview small">
+                                        <div class="overview-span">
+                                          <div class="table-wrap">
+                                            <table class="unlimited-lines compact flush">
+                                              <tr>
+                                                <th>
+                                                  <div class="table-content-wrap content-align-left">
+                                                    <div class="table-text">Seller Receive:</div>
+                                                  </div>
+                                                </th>
+                                                <td>
+                                                  <div class="table-content-wrap content-align-right">
+                                                    <div class="table-text">{{ purchase?.price?.unitAmount?.sellerReceive | formatPrice:FormatPricePipe.prefixType.MINUS_ONLY }}</div>
+                                                  </div>
+                                                </td>
+                                              </tr>
+                                              <tr>
+                                                <th>
+                                                  <div class="table-content-wrap content-align-left">
+                                                    <div class="table-text">StudentShop Fee:</div>
+                                                  </div>
+                                                </th>
+                                                <td>
+                                                  <div class="table-content-wrap content-align-right">
+                                                    <div class="table-text">{{ purchase?.price?.unitAmount?.studentShopFee | formatPrice:FormatPricePipe.prefixType.MINUS_ONLY }}</div>
+                                                  </div>
+                                                </td>
+                                              </tr>
+                                              <tr>
+                                                <th>
+                                                  <div class="table-content-wrap content-align-left">
+                                                    <div class="table-text">Unit Total:</div>
+                                                  </div>
+                                                </th>
+                                                <td>
+                                                  <div class="table-content-wrap content-align-right">
+                                                    <div class="table-text">{{ purchase?.price?.unitAmount?.unitTotal | formatPrice:FormatPricePipe.prefixType.MINUS_ONLY }}</div>
+                                                  </div>
+                                                </td>
+                                              </tr>
+                                            </table>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <th>
+                                    <div class="table-content-wrap content-align-left">
+                                      <div class="table-text">Tax:</div>
+                                    </div>
+                                  </th>
+                                  <td>
+                                    <div class="table-content-wrap content-align-right">
+                                      <div class="table-text">{{ purchase?.price?.tax | formatPrice:FormatPricePipe.prefixType.MINUS_ONLY }}</div>
+                                    </div>
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <th>
+                                    <div class="table-content-wrap content-align-left">
+                                      <div class="table-text">Transaction Fee:</div>
+                                    </div>
+                                  </th>
+                                  <td>
+                                    <div class="table-content-wrap content-align-right">
+                                      <div class="table-text">{{ purchase?.price?.transactionFee | formatPrice:FormatPricePipe.prefixType.MINUS_ONLY }}</div>
+                                    </div>
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <th>
+                                    <div class="table-content-wrap content-align-left">
+                                      <div class="table-text">Total:</div>
+                                    </div>
+                                  </th>
+                                  <td>
+                                    <div class="table-content-wrap content-align-right">
+                                      <div class="table-text">{{ purchase?.price?.total | formatPrice:FormatPricePipe.prefixType.MINUS_ONLY }}</div>
+                                    </div>
+                                  </td>
+                                </tr>
+                              </table>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Is Refund Available?</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">{{ purchase?.isRefundAvailable ? 'Yes' : 'No' }}</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Refund Properties:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="overview small">
+                          <div class="overview-span">
+                            <div class="table-wrap">
+                              <table class="unlimited-lines compact flush">
+                                <tr>
+                                  <th>
+                                    <div class="table-content-wrap content-align-left">
+                                      <div class="table-text">Refund Expiry Date:</div>
+                                    </div>
+                                  </th>
+                                  <td>
+                                    <div class="table-content-wrap content-align-right">
+                                      <div class="table-text">{{ purchase?.refundProperties?.refundExpiryDate ?
+                                        purchase?.refundProperties?.refundExpiryDate?.toLocaleString("en-AU", {
+                                          month: "short",
+                                          day: "numeric",
+                                          year: "numeric",
+                                          hour: "2-digit",
+                                          minute: "2-digit",
+                                          hour12: true
+                                        }) : 'N/A' }}</div>
+                                    </div>
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <th>
+                                    <div class="table-content-wrap content-align-left">
+                                      <div class="table-text">Is Refund Restricted?</div>
+                                    </div>
+                                  </th>
+                                  <td>
+                                    <div class="table-content-wrap content-align-right">
+                                      <div class="table-text">{{ purchase?.refundProperties?.isRefundRestricted ? 'Yes' : 'No' }}</div>
+                                    </div>
+                                  </td>
+                                </tr>
+                              </table>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Date Created:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">
+                          {{ purchase?.dateCreated?.toLocaleString("en-AU", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: true
+                        }) }}
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Date Updated:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">
+                          {{ purchase?.dateUpdated?.toLocaleString("en-AU", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: true
+                        }) }}
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+            <div class="overview-right">
+              <div class="item-actions">
+
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-section">
+          <div class="items-header">
+            <h5 class="header-title">Refund</h5>
+          </div>
+          @if (purchase?.refund) {
+            <div class="overview">
+              <div class="overview-span">
+                <div class="table-wrap">
+                  <table class="unlimited-lines compact flush">
+                    <tr>
+                      <th>
+                        <div class="table-content-wrap content-align-left">
+                          <div class="table-text">ID:</div>
+                        </div>
+                      </th>
+                      <td>
+                        <div class="table-content-wrap content-align-right">
+                          <div class="table-text">{{ purchase?.refund?._id }}</div>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>
+                        <div class="table-content-wrap content-align-left">
+                          <div class="table-text">Reason Type:</div>
+                        </div>
+                      </th>
+                      <td>
+                        <div class="table-content-wrap content-align-right">
+                          <div class="table-text">{{ purchase?.refund?.reasonType }}</div>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>
+                        <div class="table-content-wrap content-align-left">
+                          <div class="table-text">Reason Description:</div>
+                        </div>
+                      </th>
+                      <td>
+                        <div class="table-content-wrap content-align-right">
+                          <div class="table-text">{{ purchase?.refund?.reasonDescription }}</div>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>
+                        <div class="table-content-wrap content-align-left">
+                          <div class="table-text">Status:</div>
+                        </div>
+                      </th>
+                      <td>
+                        <div class="table-content-wrap content-align-right">
+                          <div class="item-details">
+                            <div class="category status" [style.background-color]="(purchase?.refund | getStatus).backgroundColour">
+                              <div class="category-text status" [style.color]="(purchase?.refund | getStatus).textColour">
+                                {{ (purchase?.refund | getStatus).text }}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+              <div class="overview-right">
+                <div class="item-actions no-stretch">
+                  <button (click)="toggleRefundContextMenu($event, purchase?.refund)" type="button" class="button no-border circle-btn small transparent">
+                    <i class="fi fi-rs-menu-dots-vertical icon mini-icon"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          } @else {
+            <div class="empty-message-wrap">
+              <p class="footer-text">Purchase has no associated refund.</p>
+            </div>
+          }
+        </div>
+        <div class="card-section span">
+          <div class="items-header">
+            <h5 class="header-title">Transactions</h5>
+          </div>
+          @if (purchase?.transactions?.length) {
+            <div class="overview">
+              <div class="overview-span">
+                <div class="table-wrap limited-height">
+                  <table class="compact flush">
+                    <tr>
+                      <th class="table-link-cell"></th>
+                      <th><div class="table-content-wrap"><div class="table-text">User</div></div></th>
+                      <th><div class="table-content-wrap"><div class="table-text">Type</div></div></th>
+                      <th><div class="table-content-wrap"><div class="table-text">Amount</div></div></th>
+                      <th><div class="table-content-wrap"><div class="table-text">Status</div></div></th>
+                      <th><div class="table-content-wrap"><div class="table-text">Fulfilment Date</div></div></th>
+                      <th><div class="table-content-wrap"><div class="table-text">Date Created</div></div></th>
+                      <th><div class="table-content-wrap"><div class="table-text">Date Updated</div></div></th>
+                      <th></th>
+                    </tr>
+                    @for (transaction of purchase?.transactions; track $index) {
+                      <tr class="table-link">
+                        <td class="table-link-cell">
+                          <a [routerLink]="['/admin/transactions', transaction._id]" tabindex="0" class="link-block"></a>
+                        </td>
+                        <td>
+                          <div class="table-content-wrap">
+                            <a [routerLink]="['/admin/users', transaction.userUid]" class="table-text link-underline-hover">{{ transaction.user?.username }}</a>
+                          </div>
+                        </td>
+                        <td>
+                          <div class="table-content-wrap">
+                            <div class="table-text">
+                              @switch (transaction.info?.transactionType) {
+                                @case (Transaction.TransactionType.REFUND) {Refund}
+                                @case (Transaction.TransactionType.SALE) {Sale}
+                                @case (Transaction.TransactionType.WITHDRAWAL) {Withdrawal}
+                              }
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <div class="table-content-wrap content-align-right">
+                            <div class="table-text">{{ transaction.amount | formatPrice:FormatPricePipe.prefixType.PLUS_AND_MINUS }}</div>
+                          </div>
+                        </td>
+                        <td>
+                          <div class="table-content-wrap">
+                            <div class="item-details">
+                              <div class="category status" [style.background-color]="(transaction | getStatus).backgroundColour">
+                                <div class="category-text status" [style.color]="(transaction | getStatus).textColour">
+                                  {{ (transaction | getStatus).text }}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <div class="table-content-wrap">
+                            <div class="table-text">{{ transaction.fulfilmentDate ? transaction.fulfilmentDate.toLocaleString("en-AU", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: true
+                            }) : 'N/A' }}</div>
+                          </div>
+                        </td>
+                        <td>
+                          <div class="table-content-wrap">
+                            <div class="table-text">{{ transaction.dateCreated.toLocaleDateString("en-AU", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric"
+                            }) }}</div>
+                          </div>
+                        </td>
+                        <td>
+                          <div class="table-content-wrap">
+                            <div class="table-text">{{ transaction.dateUpdated.toLocaleDateString("en-AU", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric"
+                            }) }}</div>
+                          </div>
+                        </td>
+                        <td>
+                          <div class="table-content-wrap">
+                            <button (click)="toggleTransactionContextMenu($event, transaction)" type="button" class="button no-border circle-btn small transparent">
+                              <i class="fi fi-rs-menu-dots-vertical icon mini-icon"></i>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    }
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div class="items-footer">
+              <p class="text-fine-print align-center">You've reached the end. No more transactions beyond this point.</p>
+            </div>
+          } @else {
+            <div class="empty-message-wrap">
+              <p class="footer-text">Purchase has no associated transactions.</p>
+            </div>
+          }
+        </div>
+      </div>
+    } @else {
+      <div class="card-section">
+        <div class="empty-message-wrap">
+          <p class="footer-text"><a (click)="toggleLogin()" class="link-underline-hover pink">Log in</a> as an administrator/staff to view admin pages.</p>
+        </div>
+      </div>
+    }
+  }
+</div>

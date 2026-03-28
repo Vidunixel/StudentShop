@@ -1,0 +1,18 @@
+.table-text {
+  -webkit-line-clamp: 1; /* number of lines to show */
+  line-clamp: 1;
+}
+
+.overview-left.filters {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 100%;
+  grid-template-rows: auto auto;
+  grid-auto-columns: 1fr;
+}
+
+@media screen and (max-width: 767px) {
+  .overview-left.filters {
+    grid-template-columns: 1fr;
+  }
+}

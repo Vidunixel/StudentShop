@@ -1,0 +1,134 @@
+@if (isError) {
+  <app-page-not-found></app-page-not-found>
+} @else {
+  <section class="section-header">
+    <div class="container">
+      <div class="item-heading-wrap">
+        <div class="item-cover-large-wrap">
+          <img src="{{ profile | getImageUrl }}" loading="lazy" class="avatar extra-large shadow">
+        </div>
+        <div class="item-content large">
+          <div class="item-section large">
+            <h3 class="item-heading">{{ profile?.username }}</h3>
+            <div class="item-details-large">{{ profile?.name }}</div>
+            <div *ngIf="profile?.studentDetails?.school?.school" class="item-tags-large">
+              <div class="category">
+                <div class="button-text-wrap">
+                  <i class="fi fi-br-school icon mini-icon"></i>
+                  <div class="category-text">{{ profile?.studentDetails?.school?.school }}</div>
+                </div>
+              </div>
+            </div>
+            <div *ngIf="profile?.studentDetails?.subjects?.subjects?.length" class="item-tags-large">
+              @for (subject of profile?.studentDetails?.subjects?.subjects; track $index) {
+                <div class="subject-category category">
+                  <div class="category-text">{{ subject }}</div>
+                </div>
+              }
+            </div>
+            <p class="paragraph">{{ profile?.bio }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div class="section-separator"></div>
+  <section class="section-regular">
+    <div class="container">
+      <div>
+        <div class="items-header spaced">
+          <h3 class="header-title">Listings</h3>
+          <div class="sort-form-block">
+            <form (ngSubmit)="serveNotes()">
+              <select [(ngModel)]="notesSortBy" (ngModelChange)="serveNotes()" class="dropdown-sort select" name="sortBy">
+                <option value="date-created-desc" selected>Newest</option>
+                <option value="date-created-asc">Oldest</option>
+                <option value="rating-desc">Rating: High to Low</option>
+                <option value="rating-asc">Rating: Low to High</option>
+              </select>
+            </form>
+          </div>
+        </div>
+        @if(notes.length) {
+          <div class="carousel-wrap">
+            <div class="carousel-btn-wrap left">
+              <button #carouselBtnLeft (click)="scrollCarousel('left')" class="button pill-btn">
+                <i class="fi fi-rr-arrow-small-left icon small-icon"></i>
+              </button>
+            </div>
+            <div class="carousel-btn-wrap right">
+              <button #carouselBtnRight (click)="scrollCarousel('right')" class="button pill-btn">
+                <i class="fi fi-rr-arrow-small-right icon small-icon"></i>
+              </button>
+            </div>
+            <div #carousel class="carousel">
+              @for (note of notes; track $index) {
+                <div class="listing">
+                  <a [routerLink]="['/notes', note._id]" tabindex="0" class="link-block"></a>
+                  <div class="item-thumb"><img src="{{ note | getImageUrl }}" loading="lazy" class="item-cover"></div>
+                  <div class="item-wrap">
+                    <div class="item-content">
+                      <div class="item-section">
+                        <div class="title item-title">{{ note.title }}</div>
+                        <div class="item-details">{{ note.dateCreated | formatDate }}</div>
+                        <div *ngIf="note.subjects && note.subjects.length > 0" class="item-tags">
+                          @for (subject of note.subjects; track $index) {
+                            <div class="subject-category category">
+                              <div class="category-text">{{ subject }}</div>
+                            </div>
+                          }
+                        </div>
+                        <div class="item-info">{{ note.description }}</div>
+                      </div>
+                      <div class="item-section">
+                        <div class="item-rating-wrap"><i class="fi fi-sr-document icon mini-icon"></i>
+                          <div class="item-rating" [style.background]="(note | getRating).backgroundColour">{{ (note | getRating).percentageText }}</div>
+                          <div class="small-text">{{ (note | getRating).countText }}</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div *ngIf="note.price === 0" class="sale-content">
+                      <div class="sale-price">Free</div>
+                    </div>
+                    <div class="item-buttons">
+                      <div class="item-actions">
+                        @if (isItemInCart(note._index, note._id)) {
+                          <button (click)="removeCartItem(note._index, note._id)" class="action-btn thick-border button">
+                            <div class="button-text-wrap"><i class="fi fi-rr-bag-shopping-minus icon small-icon"></i>Remove</div>
+                            <div>{{ note.price | formatPrice:FormatPricePipe.prefixType.NONE }}</div>
+                          </button>
+                        } @else if (note.isOwned) {
+                          <button routerLink="/collection" class="action-btn dark button">
+                            <div class="button-text-wrap"><i class="fi fi-rr-apps white icon small-icon"></i>In Collection</div>
+                          </button>
+                        } @else if (profile?.uid === nativeUser?.uid) {
+                          <button (click)="toggleEditListing(note)" class="action-btn thick-border button">
+                            <div class="button-text-wrap"><i class="fi fi-rr-edit icon small-icon"></i>Manage Listing</div>
+                          </button>
+                        } @else if (note.status !== Note.NoteStatus.LISTED) {
+                          <button disabled class="action-btn dark button">
+                            <div class="button-text-wrap">Unavailable</div>
+                            <div>{{ note.price | formatPrice:FormatPricePipe.prefixType.NONE }}</div>
+                          </button>
+                        } @else {
+                          <button (click)="addCartItem(note._index, note._id)" class="action-btn dark button">
+                            <div class="button-text-wrap"><i class="fi fi-rr-shopping-bag-add white icon small-icon"></i>Add to Bag</div>
+                            <div>{{ note.price === 0 ? 'Free' : note.price | formatPrice:FormatPricePipe.prefixType.NONE }}</div>
+                          </button>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        } @else {
+          <div class="empty-message-wrap">
+            <p class="footer-text">User has no listings.</p>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+}

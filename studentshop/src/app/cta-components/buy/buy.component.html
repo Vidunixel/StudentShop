@@ -1,0 +1,59 @@
+<section class="section-regular">
+  <div class="container">
+    <div></div>
+    <div>
+      <div class="cta-text">
+        <h2 class="cta-heading">Browse {{ subject || 'High School' }} study notes</h2>
+        <p class="cta-paragraph">Discover high quality notes uploaded by students across {{ region || 'Australia' }}.</p>
+      </div>
+    </div>
+    <div>
+      <div class="feature-card-container">
+        <div class="feature-card">
+          <div class="image-wrap">
+            <i class="fi fi-rr-free icon large-icon green"></i>
+          </div>
+          <div class="feature-card-text">
+            <p class="title">Free Resources</p>
+            <p class="footer-text">If it's listed as free, you can claim it without entering payment details.</p>
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="image-wrap">
+            <i class="fi fi-rr-warranty icon large-icon orange"></i>
+          </div>
+          <div class="feature-card-text">
+            <p class="title">Quality Assured</p>
+            <p class="footer-text">We don't just let anyone upload. Every document is checked for quality
+              and compliance.</p>
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="image-wrap">
+            <i class="fi fi-rr-shield-check icon large-icon grey"></i>
+          </div>
+          <div class="feature-card-text">
+            <p class="title">Buyer Protection</p>
+            <p class="footer-text">If you change your mind within 24 hours, you can claim a refund directly in the app.</p>
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="image-wrap">
+            <i class="fi fi-brands-paypal icon large-icon"></i>
+          </div>
+          <div class="feature-card-text">
+            <p class="title">Secure Checkout</p>
+            <p class="footer-text">Pay with confidence using PayPal. We never store your payment details.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="item-actions large">
+        <a [routerLink]="['/notes']" class="button pill-btn large dark">
+          <div class="button-text-wrap">Browse Study Notes</div>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,48 @@
+<div class="dialog-card">
+  <button (click)="closeAllDialogs()" class="button circle-btn no-border outer-corner"><i class="fi fi-rr-cross icon micro-icon"></i></button>
+  <div class="card-section">
+    <div class="item-wrap-review">
+      @if (reviewData.isAi) {
+        <div class="avatar-wrap vertical small-gap">
+          <img src="/ai_logo.svg" loading="lazy" class="avatar">
+          <div class="avatar-wrap mini-gap">Assistant&nbsp;<i class="fi fi-sr-shield-trust verified-badge-small"></i></div>
+          <div class="text-fine-print">Assistant may not always be accurate.</div>
+        </div>
+      } @else {
+        <a (click)="navigateToProfile()" class="avatar-wrap vertical small-gap link-underline-hover"><img src="{{ reviewData.user | getImageUrl }}" loading="lazy" class="avatar">
+          <p>{{ reviewData.user?.username }}</p>
+        </a>
+      }
+      <div class="review-content">
+        <div class="star-wrapper">
+          <div class="star-icon w-embed"><svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M11.9999 15.8196L7.5098 18.5619L8.73049 13.4439L4.73535 10.0216L9.97945 9.6015L11.9999 4.74316L14.0204 9.6015L19.2653 10.0216L15.2694 13.4439L16.4901 18.5619L11.9999 15.8196Z" [attr.fill]="reviewData.rating >= 1 ? 'currentColor' : 'var(--neutral--300)'"></path>
+          </svg></div>
+          <div class="star-icon w-embed"><svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M11.9999 15.8196L7.5098 18.5619L8.73049 13.4439L4.73535 10.0216L9.97945 9.6015L11.9999 4.74316L14.0204 9.6015L19.2653 10.0216L15.2694 13.4439L16.4901 18.5619L11.9999 15.8196Z" [attr.fill]="reviewData.rating >= 2 ? 'currentColor' : 'var(--neutral--300)'"></path>
+          </svg></div>
+          <div class="star-icon w-embed"><svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M11.9999 15.8196L7.5098 18.5619L8.73049 13.4439L4.73535 10.0216L9.97945 9.6015L11.9999 4.74316L14.0204 9.6015L19.2653 10.0216L15.2694 13.4439L16.4901 18.5619L11.9999 15.8196Z" [attr.fill]="reviewData.rating >= 3 ? 'currentColor' : 'var(--neutral--300)'"></path>
+          </svg></div>
+          <div class="star-icon w-embed"><svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M11.9999 15.8196L7.5098 18.5619L8.73049 13.4439L4.73535 10.0216L9.97945 9.6015L11.9999 4.74316L14.0204 9.6015L19.2653 10.0216L15.2694 13.4439L16.4901 18.5619L11.9999 15.8196Z" [attr.fill]="reviewData.rating >= 4 ? 'currentColor' : 'var(--neutral--300)'"></path>
+          </svg></div>
+          <div class="star-icon w-embed"><svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M11.9999 15.8196L7.5098 18.5619L8.73049 13.4439L4.73535 10.0216L9.97945 9.6015L11.9999 4.74316L14.0204 9.6015L19.2653 10.0216L15.2694 13.4439L16.4901 18.5619L11.9999 15.8196Z" [attr.fill]="reviewData.rating >= 5 ? 'currentColor' : 'var(--neutral--300)'"></path>
+          </svg></div>
+        </div>
+        <div class="review-date">{{ reviewData.dateUpdated.toLocaleDateString("en-AU", {
+          month: "short",
+          day: "numeric",
+          year: "numeric"
+        }) }}</div>
+        <div class="review-text">{{ reviewData.review }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="item-actions">
+    <button (click)="closeAllDialogs()" class="action-btn dark button">
+      <div class="button-text-wrap">Done</div>
+    </button>
+  </div>
+</div>

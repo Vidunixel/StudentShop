@@ -1,0 +1,131 @@
+<div class="section-regular">
+  <div class="container">
+    <div class="page-content-warp">
+      <div class="page-content">
+        <h3 class="settings-heading">Help</h3>
+        <div class="card">
+          <div class="card-section spaced">
+            <div class="paragraph-wrap">
+              <h6>How it works</h6>
+              <div>
+                <p>
+                  StudentShop is an online marketplace for Australian high school study notes. You can either upload
+                  your own PDF notes for subjects like <strong>VCE, HSC, WACE, QCE, SACE or TCE</strong> to earn money, or browse and
+                  buy notes created by other students. We cover all major curriculum levels, so you can find notes
+                  for the same subjects you study in Year 11 and 12.<br><br>
+                </p>
+                <ul>
+                  <li>
+                    <p>
+                      <strong>As a seller:</strong>
+                      Upload your PDF notes, set your price, and StudentShop will automatically create preview pages
+                      so others can sample your work before buying.
+                    </p>
+                  </li>
+                  <li>
+                    <p>
+                      <strong>As a buyer:</strong>
+                      Browse or search by subject to find notes to purchase or access for free. You’ll see reviews
+                      and sample pages to help you decide before buying.
+                    </p>
+                  </li>
+                </ul><br><br>
+                <p>
+                  For support, email us at <a href="mailto:support@studentshop.com.au" class="link-underline-hover pink">support&#64;studentshop.com.au</a>.
+                </p>
+              </div>
+            </div>
+            <div class="menu-separator no-margin"></div>
+            <div class="paragraph-wrap">
+              <div class="heading">Selling</div>
+              <h6>How do I sell my notes?</h6>
+              <p>
+                <a (click)="toggleLogin()" class="link-underline-hover pink">Log in</a> or
+                <a (click)="toggleSignup()" class="link-underline-hover pink">create an account</a>, then click
+                <a (click)="toggleSell()" class="link-underline-hover pink">Sell</a>. Enter a title and brief
+                description, upload your PDF notes, select the subject, and set a price.
+                StudentShop will review your upload for quality and compliance before it becomes publicly listed.
+              </p>
+            </div>
+            <div class="paragraph-wrap">
+              <h6>What fees does StudentShop take?</h6>
+              <p>
+                StudentShop takes a 15% commission on what remains after GST and the item’s share of the PayPal
+                transaction fee have been deducted. For each sale, we apply deductions in this order: GST is removed
+                first; the item’s portion of the PayPal fee is taken next; then StudentShop’s 15% commission is
+                calculated from the balance remaining after those deductions.<br><br>
+                Below is a worked example showing how these deductions are applied to an order paid in AUD
+                (domestically) for a single note priced at $10.
+
+              </p>
+              <div class="image-wrap">
+                <img src="/pages/help/fees-breakdown.svg" loading="lazy" class="image rounded border">
+              </div>
+              <p class="text-fine-print">
+                *PayPal’s fees depend on many factors and can change over time. For up-to-date rates and fee details, visit
+                <a href="https://www.paypal.com/au/business/paypal-business-fees"
+                   target="_blank" rel="noopener noreferrer" class="link-underline-hover pink">PayPal Merchant Fees</a>.
+              </p>
+            </div>
+            <div class="paragraph-wrap">
+              <h6>Why is my sale pending?</h6>
+              <p>
+                When someone buys your notes, the sale is first marked as pending. This is because it can take up to
+                two days for the payment to clear and be credited to your StudentShop account. Once the payment is
+                confirmed, the status will change from pending to completed, and the funds will be available
+                in your account balance.
+              </p>
+            </div>
+            <div class="paragraph-wrap">
+              <h6>Why is my sale rejected?</h6>
+              <p>
+                A sale might be marked as rejected if there’s an issue. This can happen if the buyer requested a
+                refund or if we found a problem (like a terms-of-service violation) with the notes. Remember,
+                StudentShop reviews every uploaded note for compliance. If a note breaks our rules or a buyer
+                is not satisfied, we may cancel the sale. In these cases, the sale will not go through, and
+                you won’t receive payment for that transaction.
+              </p>
+            </div>
+            <div class="menu-separator no-margin"></div>
+            <div class="paragraph-wrap">
+              <div class="heading">Buying</div>
+              <h6>Do I need to pay for free notes?</h6>
+              <p>
+                No. Free notes can be claimed without entering any payment details. You do need a StudentShop account,
+                but free notes cost $0. You can access them at no charge as soon as you claim them.
+              </p>
+            </div>
+            <div class="paragraph-wrap">
+              <h6>Can I download notes?</h6>
+              <p>
+                If a note is marked <strong>Downloadable&nbsp;<i class="fi fi-br-check-circle icon inline green"></i></strong>,
+                you can download it as a PDF file to your device at anytime. Notes marked as
+                <strong>Downloadable&nbsp;<i class="fi fi-br-cross-circle icon inline red"></i></strong> are only
+                available to view in your <a [routerLink]="['/collection']" class="link-underline-hover pink">Collection</a>
+                while you’re online.
+              </p>
+            </div>
+            <div class="paragraph-wrap">
+              <h6>How do I refund an item?</h6>
+              <p>
+                For details about refunds, please see our full <a [routerLink]="['/refunds']"
+                                                                  class="link-underline-hover pink">Refund Policy</a>.
+              </p>
+            </div>
+            <div class="menu-separator no-margin"></div>
+            <div class="paragraph-wrap">
+              <div class="heading">Withdrawals</div>
+              <h6>Why is my withdrawal pending?</h6>
+              <p>
+                After you request a withdrawal, the transfer can take a few days. We may take up to 5 days to
+                review and approve the withdrawal request. During this time, the status will show as pending. Once
+                approved, you’ll receive the funds in your PayPal account. The exact timing may also depend on
+                PayPal’s processing times.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

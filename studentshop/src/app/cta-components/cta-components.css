@@ -1,0 +1,55 @@
+.cta-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.cta-heading {
+  text-align: center;
+}
+
+.cta-paragraph {
+  font-size: 16px;
+  text-align: center;
+}
+
+.feature-card-container {
+  grid-template-rows: auto;
+  grid-template-columns: minmax(200px, 300px) minmax(200px, 300px) minmax(200px, 300px) minmax(200px, 300px);
+  grid-auto-columns: minmax(200px, 300px);
+  justify-content: center;
+  align-items: center;
+  display: grid;
+  gap: 32px;
+}
+
+.feature-card {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  padding: 20px;
+  border-radius: 16px;
+  gap: 16px;
+  justify-content: space-evenly;
+  box-shadow: 0 2px 5px 1px rgba(0, 0, 0, .2);
+  background-color: var(--neutral--white);
+}
+
+.feature-card .feature-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+@media screen and (max-width: 991px) {
+  .feature-card-container {
+    grid-template-columns: minmax(200px, 300px) minmax(200px, 300px);
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .feature-card-container {
+    grid-template-columns: minmax(200px, 300px);
+  }
+}

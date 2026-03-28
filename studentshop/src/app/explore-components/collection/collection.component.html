@@ -1,0 +1,62 @@
+@if (isError) {
+  <app-page-not-found></app-page-not-found>
+} @else {
+  <section class="section-category-header">
+    <div class="container">
+      <div class="category-heading-wrap">
+        <h1 class="category-heading">Collection</h1>
+      </div>
+    </div>
+  </section>
+  <div class="section-separator"></div>
+  <section class="section-regular">
+    <div class="container">
+      <div>
+        <div *ngIf="isLoading" class="loading-container">
+          <div class="loading-bar"></div>
+        </div>
+        @if (authenticationService.isLoggedIn) {
+          @if (collection.length > 0) {
+            <div class="items collection">
+              @for (note of collection; track $index) {
+                <div class="listing collection">
+                  <a [routerLink]="['/notes', note._id, 'view']" tabindex="0" class="link-block"></a>
+                  <button (click)="toggleContextMenu($event, note)" class="button no-border circle-btn small transparent inner-corner mini-corner">
+                    <i class="fi fi-rs-menu-dots-vertical icon mini-icon"></i>
+                  </button>
+                  <div class="item-thumb">
+                    <img src="{{ note | getImageUrl }}" loading="lazy" class="item-cover">
+                  </div>
+                  <div class="item-content">
+                    <div class="item-section">
+                      <div class="title item-title">{{ note.title }}</div>
+                      <div class="item-details">
+                        <a [routerLink]="['/users', note.seller?.username]" class="avatar-wrap mini-gap link-underline-hover">
+                          <img src="{{ note.seller | getImageUrl }}" loading="lazy" class="avatar mini">
+                          <p>{{ note.seller?.username }}</p>
+                        </a>&nbsp;·&nbsp;{{ note.dateUpdated.getFullYear() }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+            <div *ngIf="isLoadMoreEnabled" class="items-footer">
+              <button (click)="serveCollection(collection[collection.length -1].sort)" class="pill-btn small button">
+                <div class="small-text button-text-wrap">Load More</div>
+              </button>
+            </div>
+          } @else {
+            <div class="empty-message-wrap">
+              <p class="footer-text">Your collection is empty. Purchased notes appear here.</p>
+            </div>
+          }
+        } @else {
+          <div class="empty-message-wrap">
+            <p class="footer-text"><a (click)="toggleLogin()" class="link-underline-hover pink">Log in</a> or <a (click)="toggleSignup()" class="link-underline-hover pink">sign up</a> to view collection.</p>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+}

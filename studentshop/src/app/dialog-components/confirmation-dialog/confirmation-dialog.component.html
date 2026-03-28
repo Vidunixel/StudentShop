@@ -1,0 +1,21 @@
+<div class="dialog-card">
+  <div class="card-section">
+    <h5 class="dialog-title">{{ confirmationDialogData.message }}</h5>
+    <div *ngIf="confirmationDialogData.imageUrl" class="image-wrap">
+      <img src="{{ confirmationDialogData.imageUrl }}" width="200px">
+    </div>
+    <p *ngIf="confirmationDialogData.description" class="message" [innerHTML]="confirmationDialogData.description"></p>
+  </div>
+  <div class="item-actions">
+    <button [disabled]="isLoading" (click)="onConfirm(true)" class="action-btn dark button">
+      @if (isLoading) {
+        <div class="button-text-wrap">Loading...</div>
+      } @else {
+        <div class="button-text-wrap">{{ confirmationDialogData.yesOption }}</div>
+      }
+    </button>
+    <button [disabled]="isLoading" *ngIf="confirmationDialogData.noOption" (click)="onConfirm(false)" class="action-btn button">
+      <div class="button-text-wrap">{{ confirmationDialogData.noOption }}</div>
+    </button>
+  </div>
+</div>

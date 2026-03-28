@@ -1,0 +1,37 @@
+.overlay {
+  display: none;
+  animation: fadeIn 300ms ease;
+  padding: 2% 40px 2% 40px; /* Top & bottom padding contains space for close dialog icon. */
+}
+
+.overlay.--open {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0,0,0,0.3);
+  z-index: 1000;
+}
+
+.dialog {
+  display: block;
+  max-height: min(800px, 100%);
+  max-width: 100%;
+}
+
+.dialog.shake {
+  animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+.dialog.squeeze {
+  animation: squeeze 0.3s ease 0s 1 normal forwards;
+}
+
+.dialog.medium-width {
+  width: 400px
+}

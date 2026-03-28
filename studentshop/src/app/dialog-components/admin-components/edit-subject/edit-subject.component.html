@@ -1,0 +1,44 @@
+<div class="dialog-card">
+  <button (click)="closeAllDialogs()" class="button circle-btn no-border outer-corner"><i class="fi fi-rr-cross icon micro-icon"></i></button>
+  <div class="card-section">
+    <h4 class="dialog-title">Edit subject</h4>
+    <form class="form" id="editSubject" #form="ngForm" (ngSubmit)="updateSubject(form)" novalidate>
+      <div class="input-wrap">
+        <label>Certificate</label>
+        <select [(ngModel)]="certificate" [ngClass]="{'error': (form['submitted'] && form.controls['certificate'].invalid)}" required class="dropdown-sort select" name="certificate">
+          <option value="" disabled selected>-- Select --</option>
+          @for (certificate of Object.entries(Subject.Certificate); track $index) {
+            <option value="{{certificate[1]}}">{{ certificate[0] }}</option>
+          }
+        </select>
+        <div class="form-error-text" *ngIf="form['submitted'] && form.controls['certificate'].invalid">
+          @if (form.controls['certificate'].errors?.['required']) {
+            *Certificate is required.
+          } @else {
+            *Certificate is invalid.
+          }
+        </div>
+      </div>
+      <div class="input-wrap">
+        <label>Name</label>
+        <input [(ngModel)]="name" [ngClass]="{'error': (form['submitted'] && form.controls['name'].invalid)}" required name="name" class="form-field input" autocomplete="off" placeholder="Enter a subject name" [pattern]="nonEmptyRegex" type="text">
+        <div class="form-error-text" *ngIf="form['submitted'] && form.controls['name'].invalid">
+          @if (form.controls['name'].errors?.['required']) {
+            *Name is required.
+          } @else {
+            *Name is invalid.
+          }
+        </div>
+      </div>
+    </form>
+  </div>
+  <div *ngIf="errorMessage || successMessage">
+    <div class="form-error-text" *ngIf="errorMessage">{{ errorMessage }}</div>
+    <div *ngIf="successMessage" class="form-success-text"><i class="fi fi-br-check icon micro-icon green"></i>{{ successMessage }}</div>
+  </div>
+  <div class="item-actions">
+    <button [disabled]="isLoading" form="editSubject" type="submit" class="action-btn dark button">
+      <div class="button-text-wrap">{{ isLoading? "Loading..." : "Update" }}</div>
+    </button>
+  </div>
+</div>

@@ -1,0 +1,547 @@
+<h3 class="settings-heading" xmlns="http://www.w3.org/1999/html">Notes</h3>
+<div *ngIf="errorMessage" class="overview info-message">
+  <div class="overview-left">
+    <i class="fi fi-rr-cross-circle icon small-icon"></i>
+    <div class="label-wrap">
+      <p>{{ errorMessage }}</p>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="loading-bar"></div>
+  </div>
+  @if (errorMessage) {
+    <app-page-not-found></app-page-not-found>
+  } @else {
+    @if (authenticationService.isLoggedIn && [NativeUser.AccountType.ADMIN, NativeUser.AccountType.STAFF].includes(nativeUser?.accountType || '')) {
+      <div class="grid-container">
+        <div class="card-section">
+          <div class="overview">
+            <div class="overview-span">
+              <div class="table-wrap">
+                <table class="unlimited-lines compact flush">
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <h6 class="table-text subheading dark">{{ note?.title }}</h6>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <img src="{{ note | getImageUrl }}" loading="lazy" class="item-cover no-shadow">
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">ID:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">{{ note?._id }}</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Seller:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <a [routerLink]="['/admin/users', note?.sellerUid]" class="table-text link-underline-hover">{{ note?.seller?.username }}</a>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Title:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">{{ note?.title }}</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Subjects:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        @if (note?.subjects?.length) {
+                          <div class="item-tags">
+                            @for (subject of note?.subjects; track $index) {
+                              <div class="subject-category category">
+                                <div class="category-text">{{ subject }}</div>
+                              </div>
+                            }
+                          </div>
+                        } @else {
+                          <div class="table-text">N/A</div>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Description:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">{{ note?.description }}</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Status:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="item-details">
+                          <div class="category status" [style.background-color]="(note | getStatus).backgroundColour">
+                            <div class="category-text status" [style.color]="(note | getStatus).textColour">
+                              {{ (note | getStatus).text }}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Price:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">{{ note?.price | formatPrice:FormatPricePipe.prefixType.NONE }}</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Pages:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">{{ note?.pageCount }}</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Purchases:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">{{ note?.purchaseCount }}</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">PDF File:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">{{ note?.pdfFile }}</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Sample Pages:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">
+                          @if (note?.samplePdfProperties?.length) {
+                            {{ JSON.stringify(note?.samplePdfProperties) }}
+                          } @else {
+                            N/A
+                          }
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Rating:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">{{ (note | getRating).starText }}</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Review Count:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">{{ JSON.stringify(note?.ratingCount) }} {{ (note | getRating).countText }}</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Refund Policy:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="overview small">
+                          <div class="overview-span">
+                            <div class="table-wrap">
+                              <table class="unlimited-lines compact flush">
+                                <tr>
+                                  <th>
+                                    <div class="table-content-wrap content-align-left">
+                                      <div class="table-text">Period:</div>
+                                    </div>
+                                  </th>
+                                  <td>
+                                    <div class="table-content-wrap content-align-right">
+                                      <div class="table-text">
+                                        @if (note?.refundPolicy?.refundPeriod) {
+                                          {{ Number(note?.refundPolicy?.refundPeriod) / (24 * 60 * 60 * 1000) }}&nbsp;Day(s)
+                                        } @else {
+                                          N/A
+                                        }
+                                      </div>
+                                    </div>
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <th>
+                                    <div class="table-content-wrap content-align-left">
+                                      <div class="table-text">Accepted Reasons:</div>
+                                    </div>
+                                  </th>
+                                  <td>
+                                    <div class="table-content-wrap content-align-right">
+                                      <div class="table-text">
+                                        @if (note?.refundPolicy?.acceptedReasons?.length) {
+                                          @for (acceptedReason of note?.refundPolicy?.acceptedReasons; track $index) {
+                                            •&nbsp;{{ acceptedReason }}<br>
+                                          }
+                                        } @else {
+                                          N/A
+                                        }
+                                      </div>
+                                    </div>
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <th>
+                                    <div class="table-content-wrap content-align-left">
+                                      <div class="table-text">Approval Required?</div>
+                                    </div>
+                                  </th>
+                                  <td>
+                                    <div class="table-content-wrap content-align-right">
+                                      <div class="table-text">
+                                        {{ note?.refundPolicy?.isApprovalRequired ? 'Yes' : 'No' }}
+                                      </div>
+                                    </div>
+                                  </td>
+                                </tr>
+                              </table>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Rejection Reason:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        @if (note?.rejectReason) {
+                          <div class="overview small">
+                            <div class="overview-span">
+                              <div class="table-wrap">
+                                <table class="unlimited-lines compact flush">
+                                  <tr>
+                                    <th>
+                                      <div class="table-content-wrap content-align-left">
+                                        <div class="table-text">Is AI?</div>
+                                      </div>
+                                    </th>
+                                    <td>
+                                      <div class="table-content-wrap content-align-right">
+                                        <div class="table-text">{{ note?.rejectReason?.isAi ? 'Yes' : 'No' }}</div>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <th>
+                                      <div class="table-content-wrap content-align-left">
+                                        <div class="table-text">Flagged Sections:</div>
+                                      </div>
+                                    </th>
+                                    <td>
+                                      <div class="table-content-wrap content-align-right">
+                                        <div class="table-text">
+                                          @for (section of note?.rejectReason?.flaggedSections; track $index) {
+                                            •&nbsp;{{ section }}<br>
+                                          }
+                                        </div>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <th>
+                                      <div class="table-content-wrap content-align-left">
+                                        <div class="table-text">Feedback:</div>
+                                      </div>
+                                    </th>
+                                    <td>
+                                      <div class="table-content-wrap content-align-right">
+                                        <div class="table-text">{{ note?.rejectReason?.feedback }}</div>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </div>
+                            </div>
+                          </div>
+                        } @else {
+                          <div class="table-text">N/A</div>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Date Created:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">
+                          {{ note?.dateCreated?.toLocaleString("en-AU", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: true
+                        }) }}
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Date Updated:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">
+                          {{ note?.dateUpdated?.toLocaleString("en-AU", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: true
+                        }) }}
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+            <div class="overview-right">
+              <div class="item-actions no-stretch">
+                <button *ngIf="[Note.NoteStatus.PROCESSING, Note.NoteStatus.PENDING_REVIEW, Note.NoteStatus.LISTED, Note.NoteStatus.DELISTED].includes(note?.status || '')" (click)="toggleRejectNoteAdmin()" class="button">
+                  <div class="button-text-wrap justify-left"><i class="fi fi-sr-vote-nay icon mini-icon red"></i>Reject</div>
+                </button>
+                <button *ngIf="[Note.NoteStatus.PROCESSING, Note.NoteStatus.PENDING_REVIEW, Note.NoteStatus.REJECTED].includes(note?.status || '')" (click)="approveNote()" class="button">
+                  <div class="button-text-wrap justify-left"><i class="fi fi-sr-vote-yea icon mini-icon green"></i>Approve</div>
+                </button>
+                <button *ngIf="note?.status !== Note.NoteStatus.DELETED" (click)="toggleNoteContextMenu($event, note)" type="button" class="button no-border circle-btn small transparent">
+                  <i class="fi fi-rs-menu-dots-vertical icon mini-icon"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-section note-viewer">
+          <h5 class="header-title">PDF Preview</h5>
+          <div class="overview">
+            <div class="overview-span">
+              <iframe [src]="(pdfUrlObject || '') | sanitiseUrl" class="note-viewer-iframe"></iframe>
+            </div>
+          </div>
+        </div>
+        <div class="card-section span">
+          <div class="items-header">
+            <h5 class="header-title">Reviews</h5>
+            <div class="sort-form-block">
+              <form (ngSubmit)="serveReviews()">
+                <select [(ngModel)]="reviewsSortBy" (ngModelChange)="serveReviews()" class="dropdown-sort select" name="sortBy">
+                  <option value="date-created-desc">Date Created: Newest</option>
+                  <option value="date-created-asc">Date Created: Oldest</option>
+                  <option value="date-updated-desc">Date Updated: Newest</option>
+                  <option value="date-updated-asc">Date Updated: Oldest</option>
+                  <option value="rating-desc">Rating: High to Low</option>
+                  <option value="rating-asc">Rating: Low to High</option>
+                </select>
+              </form>
+            </div>
+          </div>
+          @if (reviews.length > 0) {
+            <div class="overview">
+              <div class="overview-span">
+                <div class="table-wrap">
+                  <table class="compact flush">
+                    <tr>
+                      <th class="table-link-cell"></th>
+                      <th><div class="table-content-wrap"><div class="table-text">User</div></div></th>
+                      <th><div class="table-content-wrap"><div class="table-text">Rating</div></div></th>
+                      <th><div class="table-content-wrap"><div class="table-text">Review</div></div></th>
+                      <th><div class="table-content-wrap"><div class="table-text">Date Created</div></div></th>
+                      <th><div class="table-content-wrap"><div class="table-text">Date Updated</div></div></th>
+                      <th></th>
+                    </tr>
+                    @for (review of reviews; track $index) {
+                      <tr class="table-link">
+                        <td class="table-link-cell">
+                          <a [routerLink]="['/admin/reviews', review._id]" tabindex="0" class="link-block"></a>
+                        </td>
+                        <td>
+                          <div class="table-content-wrap">
+                            @if (review.isAi) {
+                              <div class="table-text">Assistant</div>
+                            } @else {
+                              <a [routerLink]="['/admin/users', review.user]" class="table-text link-underline-hover">{{ review?.user?.username }}</a>
+                            }
+                          </div>
+                        </td>
+                        <td>
+                          <div class="table-content-wrap">
+                            <div class="table-text">
+                              <div class="star-wrapper">
+                                <div class="star-icon w-embed"><svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M11.9999 15.8196L7.5098 18.5619L8.73049 13.4439L4.73535 10.0216L9.97945 9.6015L11.9999 4.74316L14.0204 9.6015L19.2653 10.0216L15.2694 13.4439L16.4901 18.5619L11.9999 15.8196Z" [attr.fill]="review.rating >= 1 ? 'currentColor' : 'var(--neutral--300)'"></path>
+                                </svg></div>
+                                <div class="star-icon w-embed"><svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M11.9999 15.8196L7.5098 18.5619L8.73049 13.4439L4.73535 10.0216L9.97945 9.6015L11.9999 4.74316L14.0204 9.6015L19.2653 10.0216L15.2694 13.4439L16.4901 18.5619L11.9999 15.8196Z" [attr.fill]="review.rating >= 2 ? 'currentColor' : 'var(--neutral--300)'"></path>
+                                </svg></div>
+                                <div class="star-icon w-embed"><svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M11.9999 15.8196L7.5098 18.5619L8.73049 13.4439L4.73535 10.0216L9.97945 9.6015L11.9999 4.74316L14.0204 9.6015L19.2653 10.0216L15.2694 13.4439L16.4901 18.5619L11.9999 15.8196Z" [attr.fill]="review.rating >= 3 ? 'currentColor' : 'var(--neutral--300)'"></path>
+                                </svg></div>
+                                <div class="star-icon w-embed"><svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M11.9999 15.8196L7.5098 18.5619L8.73049 13.4439L4.73535 10.0216L9.97945 9.6015L11.9999 4.74316L14.0204 9.6015L19.2653 10.0216L15.2694 13.4439L16.4901 18.5619L11.9999 15.8196Z" [attr.fill]="review.rating >= 4 ? 'currentColor' : 'var(--neutral--300)'"></path>
+                                </svg></div>
+                                <div class="star-icon w-embed"><svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M11.9999 15.8196L7.5098 18.5619L8.73049 13.4439L4.73535 10.0216L9.97945 9.6015L11.9999 4.74316L14.0204 9.6015L19.2653 10.0216L15.2694 13.4439L16.4901 18.5619L11.9999 15.8196Z" [attr.fill]="review.rating >= 5 ? 'currentColor' : 'var(--neutral--300)'"></path>
+                                </svg></div>
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <div class="table-content-wrap">
+                            <div class="table-text">{{ review.review }}</div>
+                          </div>
+                        </td>
+                        <td>
+                          <div class="table-content-wrap">
+                            <div class="table-text">
+                              {{ review.dateCreated.toLocaleDateString("en-AU", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric"
+                            }) }}
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <div class="table-content-wrap">
+                            <div class="table-text">
+                              {{ review.dateUpdated.toLocaleDateString("en-AU", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric"
+                            }) }}
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <div class="table-content-wrap">
+                            <button (click)="toggleReviewContextMenu($event, review)" type="button" class="button no-border circle-btn small transparent">
+                              <i class="fi fi-rs-menu-dots-vertical icon mini-icon"></i>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    }
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div class="items-footer">
+              @if (reviewsIsLoadMoreEnabled) {
+                <button (click)="serveReviews(reviews[reviews.length -1].sort)" class="pill-btn dark small button">
+                  <div class="small-text button-text-wrap">Load More</div>
+                </button>
+              } @else {
+                <p class="text-fine-print align-center">You've reached the end. No more reviews beyond this point.</p>
+              }
+            </div>
+          } @else {
+            <div class="empty-message-wrap">
+              <p class="footer-text">This listing has no reviews.</p>
+            </div>
+          }
+        </div>
+      </div>
+    } @else {
+      <div class="card-section">
+        <div class="empty-message-wrap">
+          <p class="footer-text"><a (click)="toggleLogin()" class="link-underline-hover pink">Log in</a> as an administrator/staff to view admin pages.</p>
+        </div>
+      </div>
+    }
+  }
+</div>

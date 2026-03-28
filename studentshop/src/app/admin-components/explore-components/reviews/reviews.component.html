@@ -1,0 +1,183 @@
+<h3 class="settings-heading">Reviews</h3>
+<div *ngIf="errorMessage" class="overview info-message">
+  <div class="overview-left">
+    <i class="fi fi-rr-cross-circle icon small-icon"></i>
+    <div class="label-wrap">
+      <p>{{ errorMessage }}</p>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-section">
+    @if (authenticationService.isLoggedIn && [NativeUser.AccountType.ADMIN, NativeUser.AccountType.STAFF].includes(nativeUser?.accountType || '')) {
+      <form class="overview" id="filter" #form="ngForm" (ngSubmit)="serveReviews()" novalidate>
+        <div class="overview-left filters large">
+          <div class="input-wrap">
+            <label>Review</label>
+            <input [(ngModel)]="searchQuery" required name="reviewSearchQuery" autocomplete="reviewSearchQuery" class="form-field input" placeholder="Enter a review" type="text">
+          </div>
+          <div class="input-wrap">
+            <label>ID*</label>
+            <input [(ngModel)]="filters._id" required name="reviewId" autocomplete="reviewId" class="form-field input" placeholder="Enter a review ID" type="text">
+          </div>
+          <div class="input-wrap">
+            <label>User UID*</label>
+            <input [(ngModel)]="filters.userUid" required name="userUid" autocomplete="userUid" class="form-field input" placeholder="Enter a user UID" type="text">
+          </div>
+          <div class="input-wrap">
+            <label>Rating*</label>
+            <select [ngModel]="filters.rating" (ngModelChange)="filters.rating = $event ? Number($event) : ''" class="dropdown-sort select" name="rating">
+              <option value="">-- Any --</option>
+              <option [value]="1">1</option>
+              <option [value]="2">2</option>
+              <option [value]="3">3</option>
+              <option [value]="4">4</option>
+              <option [value]="5">5</option>
+            </select>
+          </div>
+          <div class="input-wrap">
+            <label class="checkbox-container">
+              <input [ngModel]="filters.isAi === true" (ngModelChange)="filters.isAi = $event ? true : undefined" name="isAi" type="checkbox"><div class="checkbox"></div>
+              <p>Is Assistant?</p>
+            </label>
+          </div>
+        </div>
+        <div class="overview-right">
+          <div class="item-actions no-stretch">
+            <select [(ngModel)]="sortBy" class="dropdown-sort select" name="sortBy">
+              <option value="relevance">Relevance</option>
+              <option value="date-created-desc">Date Created: Newest</option>
+              <option value="date-created-asc">Date Created: Oldest</option>
+              <option value="date-updated-desc">Date Updated: Newest</option>
+              <option value="date-updated-asc">Date Updated: Oldest</option>
+            </select>
+            <button type="submit" class="action-btn button pill-btn dark">
+              <div class="button-text-wrap"><i class="fi fi-rr-search icon mini-icon white"></i>Search</div>
+            </button>
+            <button (click)="clearForm(form)" type="button" class="button circle-btn small">
+              <i class="fi fi-rr-cross icon mini-icon"></i>
+            </button>
+          </div>
+        </div>
+      </form>
+      @if (isLoading) {
+        <div class="loading-container">
+          <div class="loading-bar"></div>
+        </div>
+      } @else {
+        <div class="menu-separator"></div>
+      }
+      @if (reviews.length > 0) {
+        <div class="table-wrap">
+          <table class="compact">
+            <tr>
+              <th class="table-link-cell"></th>
+              <th><div class="table-content-wrap"><div class="table-text">User</div></div></th>
+              <th><div class="table-content-wrap"><div class="table-text">Item</div></div></th>
+              <th><div class="table-content-wrap"><div class="table-text">Rating</div></div></th>
+              <th><div class="table-content-wrap"><div class="table-text">Review</div></div></th>
+              <th><div class="table-content-wrap"><div class="table-text">Date Created</div></div></th>
+              <th><div class="table-content-wrap"><div class="table-text">Date Updated</div></div></th>
+              <th></th>
+            </tr>
+            @for (review of reviews; track $index) {
+              <tr class="table-link">
+                <td class="table-link-cell">
+                  <a [routerLink]="['/admin/reviews', review._id]" tabindex="0" class="link-block"></a>
+                </td>
+                <td>
+                  <div class="table-content-wrap">
+                    @if (review?.isAi) {
+                      <div class="table-text">Assistant</div>
+                    } @else {
+                      <a [routerLink]="['/admin/users', review?.userUid]" class="table-text link-underline-hover">{{ review?.user?.username }}</a>
+                    }
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap content-align-left">
+                    @switch (review?.item?._index) {
+                      @case (Note.indexName) {
+                        <a [routerLink]="['/admin/notes', review?.item?._id]" class="table-text link-underline-hover"> {{ review?.detailedItem?.title }} </a>
+                      }
+                    }
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap">
+                    <div class="table-text">
+                      <div class="star-wrapper">
+                        <div class="star-icon w-embed"><svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M11.9999 15.8196L7.5098 18.5619L8.73049 13.4439L4.73535 10.0216L9.97945 9.6015L11.9999 4.74316L14.0204 9.6015L19.2653 10.0216L15.2694 13.4439L16.4901 18.5619L11.9999 15.8196Z" [attr.fill]="(review?.rating || 0) >= 1 ? 'currentColor' : 'var(--neutral--300)'"></path>
+                        </svg></div>
+                        <div class="star-icon w-embed"><svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M11.9999 15.8196L7.5098 18.5619L8.73049 13.4439L4.73535 10.0216L9.97945 9.6015L11.9999 4.74316L14.0204 9.6015L19.2653 10.0216L15.2694 13.4439L16.4901 18.5619L11.9999 15.8196Z" [attr.fill]="(review?.rating || 0) >= 2 ? 'currentColor' : 'var(--neutral--300)'"></path>
+                        </svg></div>
+                        <div class="star-icon w-embed"><svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M11.9999 15.8196L7.5098 18.5619L8.73049 13.4439L4.73535 10.0216L9.97945 9.6015L11.9999 4.74316L14.0204 9.6015L19.2653 10.0216L15.2694 13.4439L16.4901 18.5619L11.9999 15.8196Z" [attr.fill]="(review?.rating || 0) >= 3 ? 'currentColor' : 'var(--neutral--300)'"></path>
+                        </svg></div>
+                        <div class="star-icon w-embed"><svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M11.9999 15.8196L7.5098 18.5619L8.73049 13.4439L4.73535 10.0216L9.97945 9.6015L11.9999 4.74316L14.0204 9.6015L19.2653 10.0216L15.2694 13.4439L16.4901 18.5619L11.9999 15.8196Z" [attr.fill]="(review?.rating || 0) >= 4 ? 'currentColor' : 'var(--neutral--300)'"></path>
+                        </svg></div>
+                        <div class="star-icon w-embed"><svg width="24" height="24" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M11.9999 15.8196L7.5098 18.5619L8.73049 13.4439L4.73535 10.0216L9.97945 9.6015L11.9999 4.74316L14.0204 9.6015L19.2653 10.0216L15.2694 13.4439L16.4901 18.5619L11.9999 15.8196Z" [attr.fill]="(review?.rating || 0) >= 5 ? 'currentColor' : 'var(--neutral--300)'"></path>
+                        </svg></div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap">
+                    <div class="table-text">{{ review?.review }}</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap">
+                    <div class="table-text">{{ review.dateCreated.toLocaleDateString("en-AU", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric"
+                    }) }}</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap">
+                    <div class="table-text">{{ review.dateUpdated.toLocaleDateString("en-AU", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric"
+                    }) }}</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap">
+                    <button (click)="toggleContextMenu($event, review)" type="button" class="button no-border circle-btn small transparent">
+                      <i class="fi fi-rs-menu-dots-vertical icon mini-icon"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </table>
+        </div>
+        <div class="items-footer">
+          @if (isLoadMoreEnabled) {
+            <button (click)="serveReviews(reviews[reviews.length -1].sort)" class="pill-btn small button">
+              <div class="small-text button-text-wrap">Load More</div>
+            </button>
+          } @else {
+            <p class="text-fine-print align-center">You've reached the end. No more reviews beyond this point.</p>
+          }
+        </div>
+      } @else {
+        <div class="empty-message-wrap">
+          <p class="footer-text">Search returned no results.</p>
+        </div>
+      }
+    } @else {
+      <div class="empty-message-wrap">
+        <p class="footer-text"><a (click)="toggleLogin()" class="link-underline-hover pink">Log in</a> as an administrator/staff to view admin pages.</p>
+      </div>
+    }
+  </div>
+</div>

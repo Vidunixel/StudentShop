@@ -1,0 +1,51 @@
+.account-page-wrapper {
+  border-bottom: 1px solid var(--neutral--200);
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  max-width: none;
+  height: auto;
+  min-height: 100vh;
+  margin-left: 0;
+  margin-right: 0;
+  padding: 44px 5% 40px;
+  display: flex;
+  position: relative;
+}
+
+.account-form-block {
+  border: 1px solid var(--neutral--300);
+  background-color: var(--neutral--100);
+  border-radius: 16px;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  max-width: 500px;
+  margin-bottom: 0;
+  padding: 32px;
+}
+
+.account-form-title {
+  text-align: left;
+  border-style: none;
+  margin-bottom: 40px;
+}
+
+.account-form-heading-wrap {
+  margin-bottom: 16px;
+}
+
+.form-divider {
+  background-color: var(--neutral--200);
+  height: 1px;
+  margin-top: 23px;
+  margin-bottom: 23px;
+}
+
+.account-form-footer {
+  grid-column-gap: 8px;
+  justify-content: flex-start;
+  margin-top: 12px;
+  display: flex;
+  color: var(--neutral--500);
+}

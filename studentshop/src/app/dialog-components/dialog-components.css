@@ -1,0 +1,19 @@
+.dialog-card {
+  grid-column-gap: 16px;
+  grid-row-gap: 16px;
+  background-color: var(--neutral--white);
+  border-radius: 8px;
+  flex-flow: column;
+  justify-content: start;
+  align-items: stretch;
+  padding: 16px;
+  display: flex;
+  position: relative;
+  box-shadow: 0 0 5px rgba(0, 0, 0, .2);
+  animation: pulse 300ms;
+  max-height: 100%;
+}
+
+.dialog-title {
+  margin-right: 15px;
+}

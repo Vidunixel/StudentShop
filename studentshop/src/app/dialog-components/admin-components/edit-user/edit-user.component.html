@@ -1,0 +1,25 @@
+<div class="dialog-card">
+  <button (click)="closeAllDialogs()" class="button circle-btn no-border outer-corner"><i class="fi fi-rr-cross icon micro-icon"></i></button>
+  <div class="card-section">
+    <h4 class="dialog-title">Edit user</h4>
+    <form class="form" id="editUser" #form="ngForm" (ngSubmit)="updateUser(form)" novalidate>
+      <div class="input-wrap">
+        <label>Account Type</label>
+        <select [(ngModel)]="accountType" class="dropdown-sort select" name="accountType">
+          @for (accountType of Object.entries(NativeUser.AccountType); track $index) {
+            <option value="{{accountType[1]}}">{{ accountType[0] }}</option>
+          }
+        </select>
+      </div>
+    </form>
+  </div>
+  <div *ngIf="errorMessage || successMessage">
+    <div class="form-error-text" *ngIf="errorMessage">{{ errorMessage }}</div>
+    <div *ngIf="successMessage" class="form-success-text"><i class="fi fi-br-check icon micro-icon green"></i>{{ successMessage }}</div>
+  </div>
+  <div class="item-actions">
+    <button [disabled]="isLoading" form="editUser" type="submit" class="action-btn dark button">
+      <div class="button-text-wrap">{{ isLoading? "Loading..." : "Update" }}</div>
+    </button>
+  </div>
+</div>

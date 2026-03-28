@@ -1,0 +1,19 @@
+<div class="overlay" #overlay (mousedown)="onOverlayClick($event)" (touchstart)="onOverlayClick($event)">
+  <app-confirmation-dialog id="confirmation-dialog" *ngIf="dialogs.isConfirmationDialogOpen" [confirmationDialogData]="confirmationDialogData" class="dialog medium-width"></app-confirmation-dialog>
+  <app-login *ngIf="dialogs.isLoginOpen" class="dialog medium-width"></app-login>
+  <app-signup *ngIf="dialogs.isSignupOpen" class="dialog medium-width"></app-signup>
+  <app-social-signup *ngIf="dialogs.isSocialSignupOpen" class="dialog medium-width"></app-social-signup>
+  <app-forgot-password *ngIf="dialogs.isForgotPasswordOpen" class="dialog medium-width"></app-forgot-password>
+  <app-sell *ngIf="dialogs.isSellOpen" class="dialog medium-width"></app-sell>
+  <app-review *ngIf="dialogs.isReviewOpen" [reviewData]="reviewData" class="dialog medium-width"></app-review>
+  <app-edit-listing *ngIf="dialogs.isEditListingOpen" [editListingData]="editListingData" class="dialog medium-width"></app-edit-listing>
+  <app-update-email *ngIf="dialogs.isUpdateEmailOpen" class="dialog medium-width"></app-update-email>
+  <app-link-with-credential *ngIf="dialogs.isLinkWithCredentialOpen" class="dialog medium-width"></app-link-with-credential>
+  <app-update-password *ngIf="dialogs.isUpdatePasswordOpen" class="dialog medium-width"></app-update-password>
+  <app-refund *ngIf="dialogs.isRefundOpen" [refundData]="refundData" class="dialog medium-width"></app-refund>
+  <app-withdraw *ngIf="dialogs.isWithdrawOpen" class="dialog medium-width"></app-withdraw>
+  <app-edit-user *ngIf="dialogs.isEditUserAdminOpen" [editUserAdminData]="editUserAdminData" class="dialog medium-width"></app-edit-user>
+  <app-add-subject *ngIf="dialogs.isAddSubjectAdminOpen" class="dialog medium-width"></app-add-subject>
+  <app-edit-subject *ngIf="dialogs.isEditSubjectAdminOpen" [editSubjectAdminData]="editSubjectAdminData" class="dialog medium-width"></app-edit-subject>
+  <app-reject-note *ngIf="dialogs.isRejectNoteAdminOpen" [rejectNoteAdminData]="rejectNoteAdminData" class="dialog medium-width"></app-reject-note>
+</div>

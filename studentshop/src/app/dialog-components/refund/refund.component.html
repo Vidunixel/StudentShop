@@ -1,0 +1,87 @@
+<div class="dialog-card">
+  <button (click)="closeAllDialogs()" class="button circle-btn no-border outer-corner"><i class="fi fi-rr-cross icon micro-icon"></i></button>
+  <div class="card-section">
+    <h4 class="dialog-title">Refund</h4>
+    @if (currentPage === 1) {
+      <form class="form" id="refund" #form="ngForm" (ngSubmit)="refundData.acceptedReasons.includes(reasonType) ? refundItem(form) : nextPage(form)" novalidate>
+        <div class="input-wrap">
+          <label>Reason
+            <i class="fi fi-rr-info icon info-icon">
+              <div class="overlay-dropdown-wrap">
+                <div class="custom-dropdown">
+                  <p class="text-fine-print">Pick the reason for this refund.</p>
+                </div>
+              </div>
+            </i>
+          </label>
+          <select [(ngModel)]="reasonType" [ngClass]="{'error': (form['submitted'] && form.controls['reasonType'].invalid)}" required class="dropdown-sort select" name="reasonType">
+            <option value="" disabled selected>-- Select --</option>
+            @for (reason of Object.values(Refund.RefundReason); track $index) {
+              <option value="{{ reason }}">
+                @switch (reason) {
+                  @case (Refund.RefundReason.ACCIDENTAL_PURCHASE) {
+                    Accidental purchase
+                  }
+                  @case (Refund.RefundReason.CHANGE_OF_MIND) {
+                    Change of mind
+                  }
+                  @case (Refund.RefundReason.NOT_AS_DESCRIBED) {
+                    Not as described
+                  }
+                  @default {
+                    {{ reason }}
+                  }
+                }
+              </option>
+            }
+          </select>
+          <div class="form-error-text" *ngIf="form['submitted'] && form.controls['reasonType'].invalid">
+            @if (form.controls['reasonType'].errors?.['required']) {
+              *Reason is required.
+            } @else {
+              *Reason is invalid.
+            }
+          </div>
+        </div>
+        <div class="input-wrap">
+          <label>Reason Description
+            <i class="fi fi-rr-info icon info-icon">
+              <div class="overlay-dropdown-wrap">
+                <div class="custom-dropdown">
+                  <p class="text-fine-print">Briefly describe the problem. Details help.</p>
+                </div>
+              </div>
+            </i>
+          </label>
+          <textarea [(ngModel)]="reasonDescription" [ngClass]="{'error': (form['submitted'] && form.controls['reasonDescription'].invalid)}" required name="reasonDescription" class="text-area" autocomplete="off" minlength="1" maxlength="2000" placeholder="Describe your reason for a refund" [pattern]="nonEmptyRegex" type="text"></textarea>
+          <div class="form-error-text" *ngIf="form['submitted'] && form.controls['reasonDescription'].invalid">
+            @if (form.controls['reasonDescription'].errors?.['required']) {
+              *Description is required.
+            } @else {
+              *Description is invalid.
+            }
+          </div>
+        </div>
+      </form>
+    } @else if (currentPage === 2) {
+      <div class="empty-message-wrap">
+        <p class="footer-text">We are sorry, but your refund request for this item cannot be approved because it does not meet our refund criteria.</p>
+      </div>
+    }
+  </div>
+  <div *ngIf="errorMessage || successMessage">
+    <div class="form-error-text" *ngIf="errorMessage">{{ errorMessage }}</div>
+    <div *ngIf="successMessage" class="form-success-text"><i class="fi fi-br-check icon micro-icon green"></i>{{ successMessage }}</div>
+  </div>
+  <div class="item-actions">
+    @if (currentPage === 1) {
+      <button [disabled]="isLoading" form="refund" type="submit" class="action-btn dark button">
+        <div class="button-text-wrap">Submit</div>
+      </button>
+    } @else {
+      <button [disabled]="isLoading" (click)="previousPage()" class="action-btn button">
+        <div class="button-text-wrap"><i class="fi fi-rr-arrow-small-left icon small-icon"></i>Previous</div>
+      </button>
+    }
+  </div>
+</div>

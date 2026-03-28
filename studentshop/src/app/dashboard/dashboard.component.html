@@ -1,0 +1,135 @@
+<section class="section-header white">
+  <div class="container-cta">
+    <div class="cta-title-grid">
+      <div class="cta-content">
+        <div class="cta-text">
+          <h3>Sell notes. Earn money. Study better.</h3>
+          <p class="cta-paragraph">Buy quality notes or sell your best work to classmates across Australia.</p>
+        </div>
+        <div class="item-actions large justify-start">
+          <button (click)="toggleSell()" class="button pill-btn large dark">
+            <div class="button-text-wrap">Start Selling</div>
+          </button>
+          <button [routerLink]="['/notes']" class="button pill-btn large no-border">
+            <div class="button-text-wrap">Browse</div>
+          </button>
+        </div>
+      </div>
+      <div class="image-wrap"><img ngSrc="/illustration_students.svg" width="379" height="379" style="height: auto" priority></div>
+    </div>
+  </div>
+</section>
+<div class="section-separator"></div>
+<section class="section-regular">
+  <div class="container">
+    <div [ngStyle]="{'display': freeNotes.length > 0 ? '' : 'none'}">
+      <h4 class="carousel-heading">Free notes</h4>
+      <div class="carousel-wrap">
+        <div class="carousel-btn-wrap left">
+          <button #freeNotesCarouselBtnLeft (click)="scrollCarousel(freeNotesCarousel, freeNotesCarouselBtnLeft, freeNotesCarouselBtnRight, 'left')" class="button pill-btn">
+            <i class="fi fi-rr-arrow-small-left icon small-icon"></i>
+          </button>
+        </div>
+        <div class="carousel-btn-wrap right">
+          <button #freeNotesCarouselBtnRight (click)="scrollCarousel(freeNotesCarousel, freeNotesCarouselBtnLeft, freeNotesCarouselBtnRight, 'right')" class="button pill-btn">
+            <i class="fi fi-rr-arrow-small-right icon small-icon"></i>
+          </button>
+        </div>
+        <div #freeNotesCarousel class="carousel">
+          @for (freeNote of freeNotes; track $index) {
+            <div class="listing">
+              <a [routerLink]="['/notes', freeNote._id]" tabindex="0" class="link-block"></a>
+              <div class="item-thumb"><img src="{{ freeNote | getImageUrl }}" loading="lazy" class="item-cover"></div>
+              <div class="item-wrap">
+                <div class="item-content">
+                  <div class="item-section">
+                    <div class="title item-title">{{ freeNote.title }}</div>
+                    <div class="item-details">
+                      <a [routerLink]="['/users', freeNote.seller?.username]" class="avatar-wrap mini-gap link-underline-hover">
+                        <img src="{{ freeNote.seller | getImageUrl }}" loading="lazy" class="avatar mini">
+                        <p>{{ freeNote.seller?.username }}</p>
+                      </a>&nbsp;· {{ freeNote.dateCreated | formatDate }}
+                    </div>
+                    <div *ngIf="freeNote.subjects && freeNote.subjects.length > 0" class="item-tags">
+                      @for (subject of freeNote.subjects; track $index) {
+                        <div class="subject-category category">
+                          <div class="category-text">{{ subject }}</div>
+                        </div>
+                      }
+                    </div>
+                    <div class="item-info">{{ freeNote.description }}</div>
+                  </div>
+                  <div class="item-section">
+                    <div class="item-rating-wrap"><i class="fi fi-sr-document icon mini-icon"></i>
+                      <div class="item-rating" [style.background]="(freeNote | getRating).backgroundColour">{{ (freeNote | getRating).percentageText }}</div>
+                      <div class="small-text">{{ (freeNote | getRating).countText }}</div>
+                    </div>
+                  </div>
+                </div>
+                <div *ngIf="freeNote.price === 0" class="sale-content">
+                  <div class="sale-price">Free</div>
+                </div>
+                <div class="item-buttons">
+                  <div class="item-actions">
+                    @if (isItemInCart(freeNote._index, freeNote._id)) {
+                      <button (click)="removeCartItem(freeNote._index, freeNote._id)" class="action-btn thick-border button">
+                        <div class="button-text-wrap"><i class="fi fi-rr-bag-shopping-minus icon small-icon"></i>Remove</div>
+                        <div>{{ freeNote.price | formatPrice:FormatPricePipe.prefixType.NONE }}</div>
+                      </button>
+                    } @else if (freeNote.isOwned) {
+                      <button routerLink="/collection" class="action-btn dark button">
+                        <div class="button-text-wrap"><i class="fi fi-rr-apps white icon small-icon"></i>In Collection</div>
+                      </button>
+                    } @else if (freeNote.sellerUid === nativeUser?.uid) {
+                      <button (click)="toggleEditListing(freeNote)" class="action-btn thick-border button">
+                        <div class="button-text-wrap"><i class="fi fi-rr-edit icon small-icon"></i>Manage Listing</div>
+                      </button>
+                    } @else if (freeNote.status !== Note.NoteStatus.LISTED) {
+                      <button disabled class="action-btn dark button">
+                        <div class="button-text-wrap">Unavailable</div>
+                        <div>{{ freeNote.price | formatPrice:FormatPricePipe.prefixType.NONE }}</div>
+                      </button>
+                    } @else {
+                      <button (click)="addCartItem(freeNote._index, freeNote._id)" class="action-btn dark button">
+                        <div class="button-text-wrap"><i class="fi fi-rr-shopping-bag-add white icon small-icon"></i>Add to Bag</div>
+                        <div>{{ freeNote.price === 0 ? 'Free' : freeNote.price | formatPrice:FormatPricePipe.prefixType.NONE }}</div>
+                      </button>
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+    <div *ngIf="freeNotes.length > 0 && profilesBySales.length > 0" class="menu-separator thin no-margin"></div>
+    <div [ngStyle]="{'display': profilesBySales.length > 0 ? '' : 'none'}" >
+      <h4 class="carousel-heading">Popular Sellers</h4>
+      <div class="carousel-wrap">
+        <div class="carousel-btn-wrap left">
+          <button #profilesBySalesCarouselBtnLeft (click)="scrollCarousel(profilesBySalesCarousel, profilesBySalesCarouselBtnLeft, profilesBySalesCarouselBtnRight, 'left')" class="button pill-btn">
+            <i class="fi fi-rr-arrow-small-left icon small-icon"></i>
+          </button>
+        </div>
+        <div class="carousel-btn-wrap right">
+          <button #profilesBySalesCarouselBtnRight (click)="scrollCarousel(profilesBySalesCarousel, profilesBySalesCarouselBtnLeft, profilesBySalesCarouselBtnRight, 'right')" class="button pill-btn">
+            <i class="fi fi-rr-arrow-small-right icon small-icon"></i>
+          </button>
+        </div>
+        <div #profilesBySalesCarousel class="carousel large-gap">
+          @for (user of profilesBySales; track $index) {
+            <div class="avatar-listing">
+              <a [routerLink]="['/users', user?.username]" class="avatar-wrap medium-gap vertical avatar-shadow-on-hover">
+                <img [src]="user | getImageUrl" loading="lazy" class="avatar medium-large">
+                <div class="label-wrap">
+                  <div class="title item-title no-font-weight">{{ user?.username }}</div>
+                </div>
+              </a>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

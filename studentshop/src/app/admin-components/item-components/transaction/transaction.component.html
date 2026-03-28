@@ -1,0 +1,232 @@
+<h3 class="settings-heading" xmlns="http://www.w3.org/1999/html">Transactions</h3>
+<div *ngIf="errorMessage" class="overview info-message">
+  <div class="overview-left">
+    <i class="fi fi-rr-cross-circle icon small-icon"></i>
+    <div class="label-wrap">
+      <p>{{ errorMessage }}</p>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="loading-bar"></div>
+  </div>
+  @if (errorMessage) {
+    <app-page-not-found></app-page-not-found>
+  } @else {
+    @if (authenticationService.isLoggedIn && [NativeUser.AccountType.ADMIN, NativeUser.AccountType.STAFF].includes(nativeUser?.accountType || '')) {
+      <div class="grid-container">
+        <div class="card-section">
+          <div class="overview">
+            <div class="overview-span">
+              <div class="table-wrap">
+                <table class="unlimited-lines compact flush">
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">ID:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">{{ transaction?._id }}</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">User:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <a [routerLink]="['/admin/users', transaction?.userUid]" class="table-text link-underline-hover">{{ transaction?.user?.username }}</a>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Item:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        @if ([Transaction.TransactionType.SALE, Transaction.TransactionType.REFUND].includes(transaction?.info?.transactionType || "")) {
+                          @switch (transaction?.detailedItem?._index) {
+                            @case (Note.indexName) {
+                              <a [routerLink]="['/admin/notes', transaction?.detailedItem?._id]" class="table-text link-underline-hover"> {{ transaction?.detailedItem?.title }} </a>
+                            }
+                          }
+                        } @else {
+                          <div class="table-text">N/A</div>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Amount:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">{{ transaction?.amount | formatPrice:FormatPricePipe.prefixType.PLUS_AND_MINUS }}</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Status:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="item-details">
+                          <div class="category status" [style.background-color]="(transaction | getStatus).backgroundColour">
+                            <div class="category-text status" [style.color]="(transaction | getStatus).textColour">
+                              {{ (transaction | getStatus).text }}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Info:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="overview small">
+                          <div class="overview-span">
+                            <div class="table-wrap">
+                              <table class="unlimited-lines compact flush">
+                                <tr>
+                                  <th>
+                                    <div class="table-content-wrap content-align-left">
+                                      <div class="table-text">Transaction Type:</div>
+                                    </div>
+                                  </th>
+                                  <td>
+                                    <div class="table-content-wrap content-align-right">
+                                      <div class="table-text">
+                                        @switch (transaction?.info?.transactionType) {
+                                          @case (Transaction.TransactionType.REFUND) {Refund}
+                                          @case (Transaction.TransactionType.SALE) {Sale}
+                                          @case (Transaction.TransactionType.WITHDRAWAL) {Withdrawal}
+                                        }
+                                      </div>
+                                    </div>
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <th>
+                                    <div class="table-content-wrap content-align-left">
+                                      <div class="table-text">Purchase ID:</div>
+                                    </div>
+                                  </th>
+                                  <td>
+                                    <div class="table-content-wrap content-align-right">
+                                      <div class="table-text">{{ transaction?.info?.purchaseId ? transaction?.info?.purchaseId : 'N/A' }}</div>
+                                    </div>
+                                  </td>
+                                </tr>
+                              </table>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Fulfilment Date:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">{{ transaction?.fulfilmentDate ? transaction?.fulfilmentDate?.toLocaleString("en-AU", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: true
+                        }) : 'N/A' }}</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Date Created:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">
+                          {{ transaction?.dateCreated?.toLocaleString("en-AU", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: true
+                        }) }}
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <div class="table-content-wrap content-align-left">
+                        <div class="table-text">Date Updated:</div>
+                      </div>
+                    </th>
+                    <td>
+                      <div class="table-content-wrap content-align-right">
+                        <div class="table-text">
+                          {{ transaction?.dateUpdated?.toLocaleString("en-AU", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: true
+                        }) }}
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+            <div class="overview-right">
+              <div *ngIf="transaction?.info?.transactionType === Transaction.TransactionType.SALE && canStatusBeUpdated(transaction?.fulfilmentDate)" class="item-actions">
+                <button *ngIf="transaction?.status === Transaction.TransactionStatus.PENDING" (click)="placeInPendingOrRejectSaleTransaction(false)" class="button">
+                  <div class="button-text-wrap justify-left"><i class="fi fi-sr-vote-nay icon mini-icon red"></i>Reject</div>
+                </button>
+                <button *ngIf="transaction?.status === Transaction.TransactionStatus.REJECTED" (click)="placeInPendingOrRejectSaleTransaction(true)" class="button">
+                  <div class="button-text-wrap justify-left"><i class="fi fi-sr-vote-yea icon mini-icon orange"></i>Place in pending</div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    } @else {
+      <div class="card-section">
+        <div class="empty-message-wrap">
+          <p class="footer-text"><a (click)="toggleLogin()" class="link-underline-hover pink">Log in</a> as an administrator/staff to view admin pages.</p>
+        </div>
+      </div>
+    }
+  }
+</div>

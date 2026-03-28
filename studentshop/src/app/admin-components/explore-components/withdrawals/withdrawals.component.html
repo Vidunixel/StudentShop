@@ -1,0 +1,169 @@
+<h3 class="settings-heading">Withdrawals</h3>
+<div *ngIf="errorMessage" class="overview info-message">
+  <div class="overview-left">
+    <i class="fi fi-rr-cross-circle icon small-icon"></i>
+    <div class="label-wrap">
+      <p>{{ errorMessage }}</p>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-section">
+    @if (authenticationService.isLoggedIn && [NativeUser.AccountType.ADMIN, NativeUser.AccountType.STAFF].includes(nativeUser?.accountType || '')) {
+      <form class="overview" id="filter" #form="ngForm" (ngSubmit)="serveWithdrawals()" novalidate>
+        <div class="overview-left filters large">
+          <div class="input-wrap">
+            <label>ID*</label>
+            <input [(ngModel)]="filters._id" required name="withdrawalId" autocomplete="withdrawalId" class="form-field input" placeholder="Enter a withdrawal ID" type="text">
+          </div>
+          <div class="input-wrap">
+            <label>Transaction ID*</label>
+            <input [(ngModel)]="filters.transactionId" required name="transactionId" autocomplete="transactionId" class="form-field input" placeholder="Enter a transaction ID" type="text">
+          </div>
+          <div class="input-wrap">
+            <label>Recipient Identifier*</label>
+            <input [(ngModel)]="filters.identifier" required name="identifier" autocomplete="identifier" class="form-field input" placeholder="Enter an identifier" type="text">
+          </div>
+          <div class="input-wrap">
+            <label>Recipient Type*</label>
+            <select [(ngModel)]="filters.recipientType" class="dropdown-sort select" name="recipientType">
+              <option value="">-- Any --</option>
+              @for (type of Object.entries(Withdrawal.PaypalRecipientType); track $index) {
+                <option value="{{type[1]}}">{{ type[0] }}</option>
+              }
+            </select>
+          </div>
+          <div class="input-wrap">
+            <label>Status*</label>
+            <select [(ngModel)]="filters.status" class="dropdown-sort select" name="status">
+              <option value="">-- Any --</option>
+              @for (status of Object.entries(Withdrawal.WithdrawalStatus); track $index) {
+                <option value="{{status[1]}}">{{ status[0] }}</option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="overview-right">
+          <div class="item-actions no-stretch">
+            <select [(ngModel)]="sortBy" class="dropdown-sort select" name="sortBy">
+              <option value="date-created-desc">Date Created: Newest</option>
+              <option value="date-created-asc">Date Created: Oldest</option>
+              <option value="date-updated-desc">Date Updated: Newest</option>
+              <option value="date-updated-asc">Date Updated: Oldest</option>
+            </select>
+            <button type="submit" class="action-btn button pill-btn dark">
+              <div class="button-text-wrap"><i class="fi fi-rr-search icon mini-icon white"></i>Search</div>
+            </button>
+            <button (click)="clearForm(form)" type="button" class="button circle-btn small">
+              <i class="fi fi-rr-cross icon mini-icon"></i>
+            </button>
+          </div>
+        </div>
+      </form>
+      @if (isLoading) {
+        <div class="loading-container">
+          <div class="loading-bar"></div>
+        </div>
+      } @else {
+        <div class="menu-separator"></div>
+      }
+      @if (withdrawals.length > 0) {
+        <div class="table-wrap">
+          <table class="compact">
+            <tr>
+              <th class="table-link-cell"></th>
+              <th><div class="table-content-wrap"><div class="table-text">User</div></div></th>
+              <th><div class="table-content-wrap"><div class="table-text">Recipient Type</div></div></th>
+              <th><div class="table-content-wrap"><div class="table-text">Recipient Identifier</div></div></th>
+              <th><div class="table-content-wrap"><div class="table-text">Amount</div></div></th>
+              <th><div class="table-content-wrap"><div class="table-text">Status</div></div></th>
+              <th><div class="table-content-wrap"><div class="table-text">Date Created</div></div></th>
+              <th><div class="table-content-wrap"><div class="table-text">Date Updated</div></div></th>
+              <th></th>
+            </tr>
+            @for (withdrawal of withdrawals; track $index) {
+              <tr class="table-link">
+                <td class="table-link-cell">
+                  <a [routerLink]="['/admin/withdrawals', withdrawal._id]" tabindex="0" class="link-block"></a>
+                </td>
+                <td>
+                  <div class="table-content-wrap">
+                    <a [routerLink]="['/admin/users', withdrawal?.transaction?.userUid]" class="table-text link-underline-hover">{{ withdrawal?.transaction?.user?.username }}</a>
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap">
+                    <div class="table-text">{{ withdrawal?.paypalRecipient?.recipientType }}</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap">
+                    <div class="table-text">{{ withdrawal?.paypalRecipient?.identifier }}</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap content-align-right">
+                    <div class="table-text">{{ withdrawal?.transaction?.amount | formatPrice:FormatPricePipe.prefixType.MINUS_ONLY:true }}</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap">
+                    <div class="item-details">
+                      <div class="category status" [style.background-color]="(withdrawal | getStatus).backgroundColour">
+                        <div class="category-text status" [style.color]="(withdrawal | getStatus).textColour">
+                          {{ (withdrawal | getStatus).text }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap">
+                    <div class="table-text">{{ withdrawal.dateCreated.toLocaleDateString("en-AU", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric"
+                    }) }}</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap">
+                    <div class="table-text">{{ withdrawal.dateUpdated.toLocaleDateString("en-AU", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric"
+                    }) }}</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap">
+                    <button (click)="toggleContextMenu($event, withdrawal)" type="button" class="button no-border circle-btn small transparent">
+                      <i class="fi fi-rs-menu-dots-vertical icon mini-icon"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </table>
+        </div>
+        <div class="items-footer">
+          @if (isLoadMoreEnabled) {
+            <button (click)="serveWithdrawals(withdrawals[withdrawals.length -1].sort)" class="pill-btn small button">
+              <div class="small-text button-text-wrap">Load More</div>
+            </button>
+          } @else {
+            <p class="text-fine-print align-center">You've reached the end. No more withdrawals beyond this point.</p>
+          }
+        </div>
+      } @else {
+        <div class="empty-message-wrap">
+          <p class="footer-text">Search returned no results.</p>
+        </div>
+      }
+    } @else {
+      <div class="empty-message-wrap">
+        <p class="footer-text"><a (click)="toggleLogin()" class="link-underline-hover pink">Log in</a> as an administrator/staff to view admin pages.</p>
+      </div>
+    }
+  </div>
+</div>

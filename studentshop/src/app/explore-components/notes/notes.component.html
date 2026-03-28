@@ -1,0 +1,201 @@
+<section class="section-category-header">
+  <div class="container">
+    <div class="category-heading-wrap">
+      <h1 class="category-heading">Notes</h1>
+    </div>
+  </div>
+</section>
+<div class="section-separator"></div>
+<section class="section-regular">
+  <div class="container">
+    <div class="contents">
+      <div class="div-block-options">
+        <form (ngSubmit)="serveNotes()" class="search">
+          <div class="search-input-wrapper"><input [(ngModel)]="searchQuery" (ngModelChange)="serveNotes()" name="searchQuery" class="search-field input" placeholder="Search Notes..."></div><button class="search-btn button" type="submit"><i class="fi fi-rr-search icon small-icon"></i></button>
+        </form>
+        <div class="form-block">
+          <form (ngSubmit)="serveNotes()">
+            <div class="browse-dropdown w-dropdown">
+              <div (click)="toggleShowFilters()" [class.--open]="showFilters" class="browse-dropdown-toggle">
+                <div class="subheading-filter">Filters</div><i class="fi fi-rr-settings-sliders icon small-icon"></i>
+              </div>
+              <div *ngIf="showFilters" class="dropdown-list w-dropdown-list">
+                <div class="browse-menu">
+                  <div class="browse-divider-top"></div>
+                  <div class="filter-category">
+                    <div class="subheading-regular">Subject</div>
+                    <div class="browse-wrapper">
+                      <div class="input-wrap">
+                        <div class="blocks small-gap two-columns">
+                          @for (certificate of allCertificates; track $index) {
+                            <label [class.--current]="isSubjectOfCertificateSelected(certificate)" for="{{certificate}}" class="button block">
+                              @if (areAllSubjectsOfCertificateSelected(certificate)) {
+                                <div class="inner-corner small-corner"><i class="fi fi-br-check mini-icon"></i></div>
+                              } @else if (isSubjectOfCertificateSelected(certificate)) {
+                                <div class="inner-corner small-corner"><i class="fi fi-br-minus mini-icon"></i></div>
+                              }
+                              <div class="overview-left">
+                                <input [checked]="areAllSubjectsOfCertificateSelected(certificate)" (change)="updateSelectedCertificates($event, certificate)" style="display: none" type="checkbox" value="{{certificate}}" name="certificate" id="{{certificate}}">
+                                <div class="title">{{ certificate }}</div>
+                              </div>
+                            </label>
+                          }
+                        </div>
+                      </div>
+                      <div *ngIf="nativeUser?.studentDetails?.isActive" class="input-wrap">
+                        @for (subject of nativeUser?.studentDetails?.subjects?.subjects; track $index) {
+                          <label class="checkbox-container">
+                            <input [checked]="isInSelectedSubjects(subject)" (change)="updateSelectedUserSubjects($event, subject)" type="checkbox" name="userSubject" id="userSubject:{{subject}}"><div class="checkbox"></div>
+                            <span class="paragraph-regular form-label">{{ subject }}</span>
+                          </label>
+                        }
+                      </div>
+                      <div class="input-wrap">
+                        <div #subjectCombobox class="combobox-wrap column">
+                          <input #subjectInput [(ngModel)]="subjectSearchQuery" (ngModelChange)="serveSubjects()" (focusin)="isSubjectsAutocompleteVisible = true" name="subject" autocomplete="off" class="nested-form-field input" placeholder="Enter a subject" type="text">
+                          <div *ngIf="selectedSubjects.length > 0" class="combobox-categories">
+                            @for (selectedSubject of selectedSubjects; track $index) {
+                              <div class="subject-category category">
+                                <div class="category-text">{{ selectedSubject }}</div>
+                                <button type="button" (click)="removeSelectedSubject(selectedSubject)" class="button circle-btn no-border transparent mini"><i class="fi fi-rr-cross icon nano-icon"></i></button>
+                              </div>
+                            }
+                          </div>
+                        </div>
+                        <div #subjectAutocompleteDropdown *ngIf="isSubjectsAutocompleteVisible" class="dropdown-wrap" id="subjectAutocompleteDropdown">
+                          <div class="custom-dropdown">
+                            <p *ngIf="getSubjectsAutocompleteList().length === 0" class="text-fine-print">No matches found.</p>
+                            @for (subject of getSubjectsAutocompleteList(); track $index) {
+                              <button type="button" (click)="addSelectedSubject(subject)" class="button no-border small dropdown-result">{{ subject }}</button>
+                            }
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="browse-divider"></div>
+                  <div class="filter-category">
+                    <div class="subheading-regular">Price</div>
+                    <div class="browse-wrapper price">
+                      <div class="input-wrap horizontal">
+                        <div class="paragraph-small">$</div><input [(ngModel)]="filters.minPrice" class="small input" name="minPrice" maxlength="3" placeholder="Min" type="number">
+                      </div>
+                      <p>to</p>
+                      <div class="input-wrap horizontal">
+                        <div>$</div><input [(ngModel)]="filters.maxPrice" class="small input" name="maxPrice" maxlength="3" placeholder="Max" type="number">
+                      </div>
+                      <button type="submit" class="button">Go</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div>
+        <div class="items-header spaced">
+          @if (!isLoading) {
+            @if (errorMessage) {
+              <div class="search-results-text"><strong>Error</strong> fetching results. Please check your
+                connection or try refreshing this page.</div>
+            } @else if (searchQuery === "") {
+              <div class="search-results-text">Showing <strong>all</strong> results.</div>
+            } @else {
+              <div class="search-results-text">Showing results for <strong>&quot;{{ searchQuery }}&quot;</strong>.</div>
+            }
+          }
+          <div class="sort-form-block">
+            <form (ngSubmit)="serveNotes()">
+              <select [(ngModel)]="sortBy" (ngModelChange)="serveNotes()" class="dropdown-sort select" name="sortBy">
+                <option value="relevance" selected>Relevance</option>
+                <option value="rating-desc">Rating: High to Low</option>
+                <option value="purchase-count-desc">Purchases: High to Low</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+              </select>
+            </form>
+          </div>
+        </div>
+        <div *ngIf="isLoading" class="loading-container">
+          <div class="loading-bar"></div>
+        </div>
+        <div class="items">
+          @for (note of notes; track $index) {
+            <div class="listing">
+              <a [routerLink]="['/notes', note._id]" tabindex="0" class="link-block"></a>
+              <div class="item-thumb"><img src="{{ note | getImageUrl }}" loading="lazy" class="item-cover"></div>
+              <div class="item-wrap">
+                <div class="item-content">
+                  <div class="item-section">
+                    <div class="title item-title">{{ note.title }}</div>
+                    <div class="item-details">
+                      <a [routerLink]="['/users', note.seller?.username]" class="avatar-wrap mini-gap link-underline-hover">
+                        <img src="{{ note.seller | getImageUrl }}" loading="lazy" class="avatar mini">
+                        <p>{{ note.seller?.username }}</p>
+                      </a>&nbsp;· {{ note.dateCreated | formatDate }}
+                    </div>
+                    <div *ngIf="note.subjects && note.subjects.length > 0" class="item-tags">
+                      @for (subject of note.subjects; track $index) {
+                        <div class="subject-category category">
+                          <div class="category-text">{{ subject }}</div>
+                        </div>
+                      }
+                    </div>
+                    <div class="item-info">{{ note.description }}</div>
+                  </div>
+                  <div class="item-section">
+                    <div class="item-rating-wrap"><i class="fi fi-sr-document icon mini-icon"></i>
+                      <div class="item-rating" [style.background]="(note | getRating).backgroundColour">{{ (note | getRating).percentageText }}</div>
+                      <div class="small-text">{{ (note | getRating).countText }}</div>
+                    </div>
+                  </div>
+                </div>
+                <div *ngIf="note.price === 0" class="sale-content">
+                  <div class="sale-price">Free</div>
+                </div>
+                <div class="item-buttons">
+                  <div class="item-actions">
+                    @if (isItemInCart(note._index, note._id)) {
+                      <button (click)="removeCartItem(note._index, note._id)" class="action-btn thick-border button">
+                        <div class="button-text-wrap"><i class="fi fi-rr-bag-shopping-minus icon small-icon"></i>Remove</div>
+                        <div>{{ note.price | formatPrice:FormatPricePipe.prefixType.NONE }}</div>
+                      </button>
+                    } @else if (note.isOwned) {
+                      <button routerLink="/collection" class="action-btn dark button">
+                        <div class="button-text-wrap"><i class="fi fi-rr-apps white icon small-icon"></i>In Collection</div>
+                      </button>
+                    } @else if (note.sellerUid === nativeUser?.uid) {
+                      <button (click)="toggleEditListing(note)" class="action-btn thick-border button">
+                        <div class="button-text-wrap"><i class="fi fi-rr-edit icon small-icon"></i>Manage Listing</div>
+                      </button>
+                    } @else if (note.status !== Note.NoteStatus.LISTED) {
+                      <button disabled class="action-btn dark button">
+                        <div class="button-text-wrap">Unavailable</div>
+                        <div>{{ note.price | formatPrice:FormatPricePipe.prefixType.NONE }}</div>
+                      </button>
+                    } @else {
+                      <button (click)="addCartItem(note._index, note._id)" class="action-btn dark button">
+                        <div class="button-text-wrap"><i class="fi fi-rr-shopping-bag-add white icon small-icon"></i>Add to Bag</div>
+                        <div>{{ note.price === 0 ? 'Free' : note.price | formatPrice:FormatPricePipe.prefixType.NONE }}</div>
+                      </button>
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+        <div class="items-footer spaced">
+          @if (isLoadMoreEnabled) {
+            <button (click)="serveNotes(notes[notes.length -1].sort)" class="pill-btn dark small button">
+              <div class="small-text button-text-wrap">Load More</div>
+            </button>
+          } @else {
+            <p class="text-fine-print align-center">You've reached the end. No more listings beyond this point.</p>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

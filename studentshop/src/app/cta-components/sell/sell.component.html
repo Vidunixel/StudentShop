@@ -1,0 +1,64 @@
+<section class="section-regular">
+  <div class="container">
+    <div></div>
+    <div>
+      <div class="cta-text">
+        <h2 class="cta-heading">Sell your {{ subject || 'High School' }} notes</h2>
+        <p class="cta-paragraph">StudentShop helps you earn money by selling your notes to students across {{ region || 'Australia' }}.</p>
+      </div>
+    </div>
+    <div>
+      <div class="feature-card-container">
+        <div class="feature-card">
+          <div class="image-wrap">
+            <i class="fi fi-rr-dollar icon large-icon green"></i>
+          </div>
+          <div class="feature-card-text">
+            <p class="title">Earn Money</p>
+            <p class="footer-text">You set the price for your hard work.</p>
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="image-wrap">
+            <i class="fi fi-rr-clock icon large-icon orange"></i>
+          </div>
+          <div class="feature-card-text">
+            <p class="title">List in Minutes</p>
+            <p class="footer-text">Upload your PDF, add the details, then publish.</p>
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="image-wrap">
+            <i class="fi fi-rr-badge-percent icon large-icon grey"></i>
+          </div>
+          <div class="feature-card-text">
+            <p class="title">Transparent Fees</p>
+            <p class="footer-text">We take a 15% commission (calculated after GST and PayPal fees) on each sale.</p>
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="image-wrap">
+            <i class="fi fi-rr-expense icon large-icon"></i>
+          </div>
+          <div class="feature-card-text">
+            <p class="title">Secure Payouts</p>
+            <p class="footer-text">Funds are transferred to your PayPal account when you withdraw.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="item-actions large">
+        @if (authenticationService.isLoggedIn) {
+          <button (click)="navigateToHomeAndToggleSell()" class="button pill-btn large dark">
+            <div class="button-text-wrap">Start Selling</div>
+          </button>
+        } @else {
+          <button (click)="toggleSignup()" class="button pill-btn large dark">
+            <div class="button-text-wrap">Get Started<i class="fi fi-rr-arrow-small-right white icon small-icon"></i></div>
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+</section>

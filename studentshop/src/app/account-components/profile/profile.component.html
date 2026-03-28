@@ -1,0 +1,111 @@
+<h3 class="settings-heading">Profile</h3>
+<div class="card">
+  <div class="card-section">
+    @if (authenticationService.isLoggedIn) {
+      <div class="overview">
+        <div class="overview-left large">
+          <a [routerLink]="['/users', nativeUser?.username]">
+            <img [src]="profilePicSrc ? (profilePicSrc | sanitiseUrl) : this.nativeUser | getImageUrl" loading="lazy" class="avatar large shadow">
+          </a>
+          <div class="label-wrap">
+            <a [routerLink]="['/users', nativeUser?.username]">
+              <div class="title">{{ nativeUser?.username }}</div>
+            </a>
+            <p>{{ nativeUser?.name }}</p>
+          </div>
+        </div>
+        <div class="overview-right">
+          <label for="profilePic" class="action-btn button pill-btn">
+            <input (change)="onProfilePicFileSelected()" type="file" id="profilePic" name="profilePic" #profilePic accept=".jpeg,.jpg,.png,.gif">
+            <div class="button-text-wrap"><i class="fi fi-br-upload icon mini-icon"></i>Upload Photo</div>
+          </label>
+          <div class="upload-btn-info" *ngIf="profilePicFile">
+            <p class="text-fine-print">{{ profilePicFile.name }}</p>
+            <button (click)="removeProfilePicFile()" class="button circle-btn no-border transparent mini"><i class="fi fi-rr-cross icon nano-icon"></i></button>
+          </div>
+        </div>
+      </div>
+      <div class="menu-separator"></div>
+      <form class="form" id="update" #form="ngForm" (ngSubmit)="updateUser(form)" novalidate>
+        <div class="input-wrap">
+          <label>Full Name</label>
+          <input [(ngModel)]="name" [ngClass]="{'error': (form['submitted'] && form.controls['name'].invalid)}" required name="name" autocomplete="name" class="form-field input" minlength="1" maxlength="100" placeholder="Enter your full name" [pattern]="nonEmptyRegex" type="text">
+          <div class="form-error-text" *ngIf="form['submitted'] && form.controls['name'].invalid">*Full name is invalid.</div>
+        </div>
+        <div class="input-wrap">
+          <label>Username</label>
+          <input [(ngModel)]="username" (ngModelChange)="validateUsername(form)" [ngClass]="{'error': (form['submitted'] && form.controls['username'].invalid)}" required name="username" class="form-field input" minlength="1" maxlength="36" placeholder="Create a username" [pattern]="usernameRegex" type="text">
+          <div class="form-error-text" *ngIf="form['submitted'] && form.controls['username'].invalid">
+            @if (form.controls['username'].errors?.['usernameTaken']) {
+              *Username is already taken.
+            } @else {
+              *Username must be at least 3 characters and contain only lowercase letters, numbers, underscores, dashes, or full stops.
+            }
+          </div>
+        </div>
+        <div [class.disabled]="isNotStudent" class="input-wrap">
+          <label>School</label>
+          <div #schoolCombobox class="combobox-wrap">
+            <div *ngIf="selectedSchool" class="combobox-categories">
+              <div class="category">
+                <div class="category-text">{{ selectedSchool.name }}</div>
+                <button type="button" (click)="removeSelectedSchool()" class="button circle-btn no-border transparent mini"><i class="fi fi-rr-cross icon nano-icon"></i></button>
+              </div>
+            </div>
+            <input [disabled]="isNotStudent" #schoolInput [(ngModel)]="schoolSearchQuery" (ngModelChange)="serveSchools()" *ngIf="!selectedSchool" (focusin)="isSchoolsAutocompleteVisible = true" name="school" autocomplete="off" class="nested-form-field input" placeholder="Enter your school" type="text">
+          </div>
+          <div #schoolAutocompleteDropdown *ngIf="isSchoolsAutocompleteVisible" class="dropdown-wrap">
+            <div class="custom-dropdown">
+              <p *ngIf="querySchools.length === 0" class="text-fine-print">No matches found.</p>
+              @for (school of querySchools; track $index) {
+                <button type="button" (click)="addSelectedSchool(school)" class="button no-border small dropdown-result">{{ school }}</button>
+              }
+            </div>
+          </div>
+        </div>
+        <div [class.disabled]="isNotStudent" class="input-wrap">
+          <label>Subjects</label>
+          <div #subjectCombobox class="combobox-wrap">
+            <div *ngIf="selectedSubjects.length > 0" class="combobox-categories">
+              @for (selectedSubject of selectedSubjects; track $index) {
+                <div class="subject-category category">
+                  <div class="category-text">{{ selectedSubject }}</div>
+                  <button type="button" (click)="removeSelectedSubject(selectedSubject)" class="button circle-btn no-border transparent mini"><i class="fi fi-rr-cross icon nano-icon"></i></button>
+                </div>
+              }
+            </div>
+            <input [disabled]="isNotStudent" #subjectInput [(ngModel)]="subjectSearchQuery" (ngModelChange)="serveSubjects()" *ngIf="selectedSubjects.length < 6" (focusin)="isSubjectsAutocompleteVisible = true" name="subject" autocomplete="off" class="nested-form-field input" placeholder="Enter your subjects" type="text">
+          </div>
+          <div #subjectAutocompleteDropdown *ngIf="isSubjectsAutocompleteVisible" class="dropdown-wrap">
+            <div class="custom-dropdown">
+              <p *ngIf="getSubjectsAutocompleteList().length === 0" class="text-fine-print">No matches found.</p>
+              @for (subject of getSubjectsAutocompleteList(); track $index) {
+                <button type="button" (click)="addSelectedSubject(subject)" class="button no-border small dropdown-result">{{ subject }}</button>
+              }
+            </div>
+          </div>
+        </div>
+        <div class="input-wrap">
+          <label class="checkbox-container justify-end"><input [(ngModel)]="isNotStudent" name="isStudent" type="checkbox"><div class="checkbox"></div>
+            <p>I am not a student</p>
+          </label>
+        </div>
+        <div class="input-wrap">
+          <label>Bio</label>
+          <textarea [(ngModel)]="bio" name="bio" class="text-area" maxlength="150" placeholder="Add a bio..." type="text"></textarea>
+        </div>
+        <div class="form-error-text" *ngIf="errorMessage">{{ errorMessage }}</div>
+        <div *ngIf="successMessage" class="form-success-text"><i class="fi fi-br-check icon micro-icon green"></i>{{ successMessage }}</div>
+        <div class="overview-right">
+          <button type="submit" [disabled]="isLoading" class="pill-btn large dark button">
+            <div class="button-text-wrap">{{ isLoading ? "Loading..." : "Save" }}</div>
+          </button>
+        </div>
+      </form>
+    } @else {
+      <div class="empty-message-wrap">
+        <p class="footer-text"><a (click)="toggleLogin()" class="link-underline-hover pink">Log in</a> or <a (click)="toggleSignup()" class="link-underline-hover pink">sign up</a> to view profile settings.</p>
+      </div>
+    }
+  </div>
+</div>

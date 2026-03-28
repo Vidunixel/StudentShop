@@ -1,0 +1,147 @@
+<div *ngIf="user && !isEmailVerified" class="overview info-message banner">
+  <div class="overview-middle">
+    <div class="label-wrap">
+      <p class="small-text footer-text wrap">Please verify your email address <a routerLink="/account/security" class="link-underline-hover pink">here</a>. If you've already verified, <a (click)="refreshUserIdToken()" class="link-underline-hover pink">click here</a> to refresh details.</p>
+    </div>
+  </div>
+</div>
+<section class="navbar" #navbar>
+  <div class="container-navigation">
+    <div class="navigation-left">
+      <a routerLink="/" aria-current="page"><img ngSrc="/logo_main.png" loading="eager" alt="StudentShop Logo." width="97" height="53" class="logo"></a>
+      <div class="nav-icon-buttons">
+        <button class="pill-btn dark button" (click)="toggleSell()">
+          <div class="button-text-wrap"><i class="fi fi-sr-usd-circle white icon small-icon"></i>Sell</div>
+        </button>
+      </div>
+    </div>
+    <div class="navigation-middle" #navMiddle>
+      <nav class="nav-menu" #navMenu>
+        <a routerLink="/" aria-current="page" class="nav-link" routerLinkActive="--current" [routerLinkActiveOptions]="{ exact: true }">
+          <div class="button-text-wrap"><i class="fi fi-rr-house-blank icon small-icon" routerLinkActive="--current" [routerLinkActiveOptions]="{ exact: true }"></i>Home</div>
+        </a>
+        <a routerLink="/notes" class="nav-link" routerLinkActive="--current" [routerLinkActiveOptions]="{ exact: true }">
+          <div class="button-text-wrap"><i class="fi fi-rr-document icon small-icon" routerLinkActive="--current" [routerLinkActiveOptions]="{ exact: true }"></i>Notes</div>
+        </a>
+        <a routerLink="/collection" class="nav-link" routerLinkActive="--current" [routerLinkActiveOptions]="{ exact: true }">
+          <div class="button-text-wrap"><i class="fi fi-rr-apps icon small-icon" routerLinkActive="--current" [routerLinkActiveOptions]="{ exact: true }"></i>Collection</div>
+        </a>
+        <a *ngIf="[NativeUser.AccountType.ADMIN, NativeUser.AccountType.STAFF].includes(nativeUser?.accountType || '')" routerLink="/admin" class="nav-link" routerLinkActive="--current" [routerLinkActiveOptions]="{ exact: true }">
+          <div class="button-text-wrap"><i class="fi fi-rr-admin-alt icon small-icon" routerLinkActive="--current" [routerLinkActiveOptions]="{ exact: true }"></i>Admin</div>
+        </a>
+        <div class="menu-separator no-margin mobile"></div>
+        <div class="nav-icon-buttons mobile">
+          <a routerLink="/checkout" class="nav-icon-btn-wrap"><i class="fi fi-rr-shopping-bag icon medium-icon"></i>
+            <div *ngIf="detailedCart.length > 0" class="badge">{{ detailedCart.length }}</div>
+          </a>
+          <button class="pill-btn dark button" (click)="toggleSell()">
+            <div class="button-text-wrap"><i class="fi fi-sr-usd-circle white icon small-icon"></i>Sell</div>
+          </button>
+        </div>
+        <div class="menu-separator no-margin"></div>
+        <div class="item-actions">
+          <button *ngIf="!this.authenticationService.isLoggedIn" (click)="toggleLogin()" class="pill-btn action-btn nav-log-in mobile button">
+            <div class="button-text-wrap">Log in</div>
+          </button>
+          <a *ngIf="this.authenticationService.isLoggedIn" routerLink="/account/profile" class="avatar-wrap vertical small-gap avatar-shadow-on-hover horizontal mobile">
+            <img src="{{ this.nativeUser | getImageUrl }}" loading="lazy" class="avatar medium">
+            <p class="small-text">{{ this.nativeUser?.username }}</p>
+          </a>
+        </div>
+      </nav>
+    </div>
+    <div class="navigation-right">
+      <div class="nav-icon-buttons">
+        <a #cartDropdown appAdjustDropdownPosition (click)="toggleCartDropdown(true)" class="nav-icon-btn-wrap"><i class="fi fi-rr-shopping-bag icon medium-icon"></i>
+          <div *ngIf="detailedCart.length > 0" class="badge">{{ detailedCart.length }}</div>
+          <div *ngIf="isCartDropdownVisible" class="overlay-dropdown-wrap navbar-dropdown">
+            <div class="custom-dropdown">
+              <div class="cart">
+                <div class="card-section">
+                  <h5 class="cart-title">Bag</h5>
+                  <div class="menu-separator"></div>
+                  @if (detailedCart.length === 0) {
+                    <div class="empty-message-wrap">
+                      <p class="footer-text">Your bag is empty. Add an item to get started.</p>
+                    </div>
+                  } @else {
+                    @for (detailedItem of detailedCart; track $index) {
+                      @switch(detailedItem._index) {
+                        @case ("notes") {
+                          <div class="menu vertical-listing small-listing">
+                            <a [routerLink]="['/notes', detailedItem._id]" class="item-thumb"><img src="{{ detailedItem | getImageUrl }}" loading="lazy" class="item-cover small"></a>
+                            <div class="item-wrap">
+                              <div class="item-content">
+                                <div class="item-section">
+                                  <a [routerLink]="['/notes', detailedItem._id]" class="title item-title link-underline-hover">{{ detailedItem.title }}</a>
+                                  <div class="item-details">
+                                    <a [routerLink]="['/users', detailedItem.seller?.username]" class="avatar-wrap mini-gap link-underline-hover">
+                                      <img src="{{ detailedItem.seller | getImageUrl }}" loading="lazy" class="avatar mini">
+                                      <p>{{ detailedItem.seller?.username }}</p>
+                                    </a>&nbsp;· {{ detailedItem.dateUpdated.getFullYear() }}
+                                  </div>
+                                  <div class="item-info">{{ detailedItem.description }}</div>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="overview-right">
+                              <button title="Remove" (click)="removeCartItem(detailedItem, detailedItem._index, detailedItem._id)" class="button no-border no-margin transparent">
+                                <i class="fi fi-rr-bag-shopping-minus icon small-icon"></i>
+                              </button>
+                              <p class="item-price">${{detailedItem.price}}</p>
+                            </div>
+                          </div>
+                        }
+                      }
+                    }
+                  }
+                </div>
+                <div class="cart-actions">
+                  <div class="subtotal-wrap">
+                    <p class="subtotal-label">Total:</p>
+                    <p class="subtotal-price">AUD {{ getCartSubtotal() | formatPrice:FormatPricePipe.prefixType.NONE }}</p>
+                  </div>
+                  <button [disabled]="detailedCart.length === 0" routerLink="/checkout" class="pill-btn dark button">
+                    <div class="button-text-wrap">Checkout<i class="fi fi-rr-arrow-small-right white icon small-icon"></i></div>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </a>
+      </div>
+      <button *ngIf="!this.authenticationService.isLoggedIn" (click)="toggleLogin()" class="pill-btn nav-log-in button">
+        <div class="button-text-wrap">Log in</div>
+      </button>
+      <a #userDropdown appAdjustDropdownPosition *ngIf="this.authenticationService.isLoggedIn" (click)="toggleUserDropdown(true)" class="avatar-wrap vertical avatar-shadow-on-hover">
+        <img src="{{ this.nativeUser | getImageUrl }}" loading="lazy" class="avatar medium">
+        <div *ngIf="isUserDropdownVisible" class="overlay-dropdown-wrap navbar-dropdown">
+          <div class="custom-dropdown">
+            <a routerLink="/account/profile" class="menu"><i class="fi fi-rr-circle-user icon small-icon"></i>
+              <div class="setting-label">Profile</div>
+            </a>
+            <a routerLink="/account/earnings" class="menu"><i class="fi fi-rr-usd-circle icon small-icon"></i>
+              <div class="setting-label">Earnings</div>
+            </a>
+            <a routerLink="/account/purchases" class="menu"><i class="fi fi-rr-receipt icon small-icon"></i>
+              <div class="setting-label">Purchases</div>
+            </a>
+            <div class="menu-separator"></div>
+            <a routerLink="/account/listings" class="menu"><i class="fi fi-rr-edit icon small-icon"></i>
+              <div class="setting-label">Manage Listings</div>
+            </a>
+            <div class="menu-separator"></div>
+            <a *ngIf="authenticationService.isLoggedIn" (click)="logout()" class="menu"><i class="fi fi-rr-sign-out-alt icon small-icon"></i>
+              <div class="setting-label">Log out</div>
+            </a>
+          </div>
+        </div>
+      </a>
+      <div class="menu-button" (click)="toggleMenu()" #hamburger>
+        <i class="fi fi-rr-menu-burger icon medium-icon"></i>
+      </div>
+    </div>
+  </div>
+  <div class="nav-overlay" #navOverlay></div>
+</section>
+<div class="section-separator"></div>

@@ -1,0 +1,30 @@
+<h3 class="settings-heading">Privacy</h3>
+<div class="card">
+  <div class="card-section">
+    @if (authenticationService.isLoggedIn) {
+      <div class="subheading">Visibility</div>
+      <form class="form" id="update" #form="ngForm" novalidate>
+        <div [class.disabled]="!isActiveStudent" class="input-wrap">
+          <label>School</label>
+          <select [disabled]="!isActiveStudent" [(ngModel)]="schoolVisibility" (ngModelChange)="updateUser(form)" class="dropdown-sort select" name="school">
+            <option value="{{ NativeUser.Visibility.PUBLIC }}">Public</option>
+            <option value="{{ NativeUser.Visibility.PRIVATE }}">Private</option>
+          </select>
+        </div>
+        <div [class.disabled]="!isActiveStudent" class="input-wrap">
+          <label>Subjects</label>
+          <select [disabled]="!isActiveStudent" [(ngModel)]="subjectsVisibility" (ngModelChange)="updateUser(form)" class="dropdown-sort select" name="subjects">
+            <option ngValue="{{ NativeUser.Visibility.PUBLIC.toString() }}">Public</option>
+            <option value="{{ NativeUser.Visibility.PRIVATE.toString() }}">Private</option>
+          </select>
+        </div>
+        <div class="form-error-text" *ngIf="errorMessage">{{ errorMessage }}</div>
+        <div *ngIf="successMessage" class="form-success-text"><i class="fi fi-br-check icon micro-icon green"></i>{{ successMessage }}</div>
+      </form>
+    } @else {
+      <div class="empty-message-wrap">
+        <p class="footer-text"><a (click)="toggleLogin()" class="link-underline-hover pink">Log in</a> or <a (click)="toggleSignup()" class="link-underline-hover pink">sign up</a> to manage privacy settings.</p>
+      </div>
+    }
+  </div>
+</div>

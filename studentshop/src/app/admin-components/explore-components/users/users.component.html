@@ -1,0 +1,213 @@
+<h3 class="settings-heading">Users</h3>
+<div *ngIf="errorMessage" class="overview info-message">
+  <div class="overview-left">
+    <i class="fi fi-rr-cross-circle icon small-icon"></i>
+    <div class="label-wrap">
+      <p>{{ errorMessage }}</p>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-section">
+    @if (authenticationService.isLoggedIn && [NativeUser.AccountType.ADMIN, NativeUser.AccountType.STAFF].includes(nativeUser?.accountType || '')) {
+      <form class="overview" id="filter" #form="ngForm" (ngSubmit)="serveUsers()" novalidate>
+        <div class="overview-left filters large">
+          <div class="input-wrap">
+            <label>Name&nbsp;/&nbsp;Username</label>
+            <input [(ngModel)]="searchQuery" required name="userSearchQuery" autocomplete="userSearchQuery" class="form-field input" placeholder="Enter a name or username" type="text">
+          </div>
+          <div class="input-wrap">
+            <label>UID*</label>
+            <input [(ngModel)]="filters.uid" required name="userUid" autocomplete="userUid" class="form-field input" placeholder="Enter a user UID" type="text">
+          </div>
+          <div class="input-wrap">
+            <label>ID*</label>
+            <input [(ngModel)]="filters._id" required name="userId" autocomplete="userId" class="form-field input" placeholder="Enter a user ID" type="text">
+          </div>
+          <div class="input-wrap">
+            <label>School</label>
+            <div #schoolCombobox class="combobox-wrap">
+              <div *ngIf="selectedSchool" class="combobox-categories">
+                <div class="category">
+                  <div class="category-text">{{ selectedSchool.name }}</div>
+                  <button type="button" (click)="removeSelectedSchool()" class="button circle-btn no-border transparent mini"><i class="fi fi-rr-cross icon nano-icon"></i></button>
+                </div>
+              </div>
+              <input #schoolInput [(ngModel)]="schoolSearchQuery" (ngModelChange)="serveSchools()" *ngIf="!selectedSchool" (focusin)="isSchoolsAutocompleteVisible = true" name="school" autocomplete="off" class="nested-form-field input" placeholder="Enter a school" type="text">
+            </div>
+            <div #schoolAutocompleteDropdown *ngIf="isSchoolsAutocompleteVisible" class="dropdown-wrap">
+              <div class="custom-dropdown">
+                <p *ngIf="querySchools.length === 0" class="text-fine-print">No matches found.</p>
+                @for (school of querySchools; track $index) {
+                  <button type="button" (click)="addSelectedSchool(school)" class="button no-border small dropdown-result">{{ school }}</button>
+                }
+              </div>
+            </div>
+          </div>
+          <div class="input-wrap">
+            <label>Subjects*</label>
+            <div #subjectCombobox class="combobox-wrap">
+              <div *ngIf="selectedSubjects.length > 0" class="combobox-categories">
+                @for (selectedSubject of selectedSubjects; track $index) {
+                  <div class="subject-category category">
+                    <div class="category-text">{{ selectedSubject }}</div>
+                    <button type="button" (click)="removeSelectedSubject(selectedSubject)" class="button circle-btn no-border transparent mini"><i class="fi fi-rr-cross icon nano-icon"></i></button>
+                  </div>
+                }
+              </div>
+              <input #subjectInput [(ngModel)]="subjectSearchQuery" (ngModelChange)="serveSubjects()" (focusin)="isSubjectsAutocompleteVisible = true" name="subject" autocomplete="off" class="nested-form-field input" placeholder="Enter a subject" type="text">
+            </div>
+            <div #subjectAutocompleteDropdown *ngIf="isSubjectsAutocompleteVisible" class="dropdown-wrap">
+              <div class="custom-dropdown">
+                <p *ngIf="getSubjectsAutocompleteList().length === 0" class="text-fine-print">No matches found.</p>
+                @for (subject of getSubjectsAutocompleteList(); track $index) {
+                  <button type="button" (click)="addSelectedSubject(subject)" class="button no-border small dropdown-result">{{ subject }}</button>
+                }
+              </div>
+            </div>
+          </div>
+          <div class="input-wrap">
+            <label>Account Type*</label>
+            <select [(ngModel)]="filters.accountType" class="dropdown-sort select" name="accountType">
+              <option value="">-- Any --</option>
+              @for (accountType of Object.entries(NativeUser.AccountType); track $index) {
+                <option value="{{accountType[1]}}">{{ accountType[0] }}</option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="overview-right">
+          <div class="item-actions no-stretch">
+            <select [(ngModel)]="sortBy" class="dropdown-sort select" name="sortBy">
+              <option value="relevance">Relevance</option>
+              <option value="date-created-desc">Date Created: Newest</option>
+              <option value="date-created-asc">Date Created: Oldest</option>
+              <option value="date-updated-desc">Date Updated: Newest</option>
+              <option value="date-updated-asc">Date Updated: Oldest</option>
+            </select>
+            <button type="submit" class="action-btn button pill-btn dark">
+              <div class="button-text-wrap"><i class="fi fi-rr-search icon mini-icon white"></i>Search</div>
+            </button>
+            <button (click)="clearForm(form)" type="button" class="button circle-btn small">
+              <i class="fi fi-rr-cross icon mini-icon"></i>
+            </button>
+          </div>
+        </div>
+      </form>
+      @if (isLoading) {
+        <div class="loading-container">
+          <div class="loading-bar"></div>
+        </div>
+      } @else {
+        <div class="menu-separator"></div>
+      }
+      @if (users.length > 0) {
+        <div class="table-wrap">
+          <table class="compact">
+            <tr>
+              <th class="table-link-cell"></th>
+              <th></th>
+              <th><div class="table-content-wrap"><div class="table-text">Username</div></div></th>
+              <th><div class="table-content-wrap"><div class="table-text">Name</div></div></th>
+              <th><div class="table-content-wrap"><div class="table-text">Bio</div></div></th>
+              <th><div class="table-content-wrap"><div class="table-text">Account Type</div></div></th>
+              <th><div class="table-content-wrap"><div class="table-text">School</div></div></th>
+              <th><div class="table-content-wrap"><div class="table-text">Subjects</div></div></th>
+              <th><div class="table-content-wrap"><div class="table-text">Date Created</div></div></th>
+              <th><div class="table-content-wrap"><div class="table-text">Date Updated</div></div></th>
+              <th></th>
+            </tr>
+            @for (user of users; track $index) {
+              <tr class="table-link">
+                <td class="table-link-cell">
+                  <a [routerLink]="['/admin/users', user.uid]" tabindex="0" class="link-block"></a>
+                </td>
+                <td>
+                  <div class="table-content-wrap content-align-left">
+                    <img src="{{ user | getImageUrl }}" loading="lazy" class="avatar small">
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap content-align-left">
+                    <div class="table-text">{{ user.username }}</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap">
+                    <div class="table-text">{{ user.name }}</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap">
+                    <div class="table-text">{{ user.bio ? user.bio : 'N/A' }}</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap">
+                    <div class="table-text">{{ user.accountType }}</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap">
+                    <div class="table-text">
+                      {{ user.studentDetails?.school?.school ? user.studentDetails?.school?.school : 'N/A' }}
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap">
+                    <div class="table-text">
+                      {{ user.studentDetails?.subjects?.subjects?.length ? user.studentDetails?.subjects?.subjects?.join(', ') : 'N/A' }}
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap">
+                    <div class="table-text">{{ user.dateCreated.toLocaleDateString("en-AU", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric"
+                    }) }}</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap">
+                    <div class="table-text">{{ user.dateUpdated.toLocaleDateString("en-AU", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric"
+                    }) }}</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="table-content-wrap">
+                    <button (click)="toggleContextMenu($event, user)" type="button" class="button no-border circle-btn small transparent">
+                      <i class="fi fi-rs-menu-dots-vertical icon mini-icon"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </table>
+        </div>
+        <div class="items-footer">
+          @if (isLoadMoreEnabled) {
+            <button (click)="serveUsers(users[users.length -1].sort)" class="pill-btn small button">
+              <div class="small-text button-text-wrap">Load More</div>
+            </button>
+          } @else {
+            <p class="text-fine-print align-center">You've reached the end. No more users beyond this point.</p>
+          }
+        </div>
+      } @else {
+        <div class="empty-message-wrap">
+          <p class="footer-text">Search returned no results.</p>
+        </div>
+      }
+    } @else {
+      <div class="empty-message-wrap">
+        <p class="footer-text"><a (click)="toggleLogin()" class="link-underline-hover pink">Log in</a> as an administrator/staff to view admin pages.</p>
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,11 @@
+.card-section.note-viewer, .card-section.note-viewer .overview, .card-section.note-viewer .overview-span {
+  max-height: 85vh;
+  min-height: 400px;
+  height: 100%;
+  overflow: unset;
+}
+
+.note-viewer-iframe {
+  height: 100%;
+  width: 100%;
+}

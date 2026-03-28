@@ -1,0 +1,102 @@
+<div class="dialog-card">
+  <button (click)="closeAllDialogs()" class="button circle-btn no-border outer-corner"><i class="fi fi-rr-cross icon micro-icon"></i></button>
+  <div class="card-section">
+    <h4 class="dialog-title">Withdraw</h4>
+    <form class="form" id="login" #form="ngForm" (ngSubmit)="withdrawBalance(form)" novalidate>
+      <div class="input-wrap">
+        <label>Amount
+          <i class="fi fi-rr-info icon info-icon">
+            <div class="overlay-dropdown-wrap">
+              <div class="custom-dropdown">
+                <p class="text-fine-print">Enter the amount you want to withdraw.</p>
+              </div>
+            </div>
+          </i>
+        </label>
+        <input [(ngModel)]="amount" [ngClass]="{'error': (form['submitted'] && form.controls['amount'].invalid)}" required name="amount" class="form-field input" autocomplete="off" placeholder="Enter withdrawal amount" type="number" [pattern]="amountRegex">
+        <div class="form-error-text" *ngIf="form['submitted'] && form.controls['amount'].invalid">
+          @if (form.controls['amount'].errors?.['required']) {
+            *Withdrawal amount is required.
+          } @else if (form.controls['amount'].errors?.['pattern']) {
+            *Amount must be positive with up to two decimal places.
+          } @else if (form.controls['amount'].errors?.['insufficientFunds']) {
+            *Insufficient balance.
+          } @else {
+            *Withdrawal amount is invalid.
+          }
+        </div>
+        <div class="text-fine-print">Maximum available: {{ nativeUser?.availableBalance | formatPrice:FormatPricePipe.prefixType.MINUS_ONLY }}</div>
+      </div>
+      <div class="input-wrap">
+        <label>Send to (PayPal)
+          <i class="fi fi-rr-info icon info-icon">
+            <div class="overlay-dropdown-wrap">
+              <div class="custom-dropdown">
+                <p class="text-fine-print">Select an identifier linked to your PayPal account.</p>
+              </div>
+            </div>
+          </i>
+        </label>
+        <select [(ngModel)]="recipientType" (ngModelChange)="updateReceiverInput()" [ngClass]="{'error': (form['submitted'] && form.controls['recipientType'].invalid)}" required class="dropdown-sort select" name="recipientType">
+          <option value="" disabled selected>-- Select --</option>
+          @for (recipientType of Object.values(Transaction.PaypalRecipientType); track $index) {
+            <option value="{{ recipientType }}">
+              @switch (recipientType) {
+                @case (Transaction.PaypalRecipientType.EMAIL) {Email}
+                @case (Transaction.PaypalRecipientType.PHONE) {Phone}
+                @default {{{ recipientType }}}
+              }
+            </option>
+          }
+        </select>
+        <div class="form-error-text" *ngIf="form['submitted'] && form.controls['recipientType'].invalid">
+          @if (form.controls['recipientType'].errors?.['required']) {
+            *Payout method is required.
+          } @else {
+            *Payout method is invalid.
+          }
+        </div>
+      </div>
+      <div *ngIf="recipientType" class="input-wrap">
+        <label>{{ receiverInputLabel }}</label>
+        <input [(ngModel)]="receiver" [ngClass]="{'error': (form['submitted'] && form.controls['receiver'].invalid)}" required name="receiver" [autocomplete]="receiverInputAutocomplete" class="form-field input" maxlength="320" [placeholder]="receiverInputPlaceholder" [pattern]="receiverInputPattern" [type]="receiverInputType">
+        <div *ngIf="form['submitted'] && form.controls['receiver'].invalid" class="form-error-text">
+          @switch (recipientType) {
+            @case (Transaction.PaypalRecipientType.EMAIL) {
+              @if (form.controls['receiver'].errors?.['required']) {
+                *Email is required.
+              } @else if (form.controls['receiver'].errors?.['pattern']) {
+                *Invalid email format.
+              } @else {
+                *Email is invalid.
+              }
+            }
+            @case (Transaction.PaypalRecipientType.PHONE) {
+              @if (form.controls['receiver'].errors?.['required']) {
+                *Phone number is required.
+              } @else if (form.controls['receiver'].errors?.['pattern']) {
+                *Invalid phone number format.
+              } @else {
+                *Phone number is invalid.
+              }
+            }
+          }
+        </div>
+      </div>
+      <div [class.disabled]="!amount || !recipientType || !receiver" class="input-wrap">
+        <label class="checkbox-container"><input [disabled]="!amount || !recipientType" [(ngModel)]="isAcceptedTerms" name="isAcceptedTerms" type="checkbox"><div class="checkbox"></div>
+          <p>I understand that once funds are sent, they cannot be reversed.</p>
+        </label>
+      </div>
+    </form>
+  </div>
+  <div *ngIf="errorMessage || successMessage">
+    <div class="form-error-text" *ngIf="errorMessage">{{ errorMessage }}</div>
+    <div *ngIf="successMessage" class="form-success-text"><i class="fi fi-br-check icon micro-icon green"></i>{{ successMessage }}</div>
+  </div>
+  <div class="item-actions">
+    <button [disabled]="isLoading || !isAcceptedTerms" form="login" type="submit" class="action-btn dark button">
+      <div class="button-text-wrap">{{ isLoading? "Loading..." : "Withdraw" }}</div>
+    </button>
+  </div>
+</div>

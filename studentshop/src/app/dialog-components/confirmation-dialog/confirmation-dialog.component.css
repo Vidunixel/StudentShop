@@ -1,0 +1,14 @@
+.message {
+  color: var(--neutral--700);
+  text-align: left;
+  font-size: 16px;
+  font-weight: 400;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.image-wrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}

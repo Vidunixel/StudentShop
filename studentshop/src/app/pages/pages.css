@@ -1,0 +1,18 @@
+.page-content-warp {
+  display: flex;
+  justify-content: center;
+}
+
+.page-content {
+  width: 700px;
+}
+
+.card-section.spaced {
+  gap: 32px;
+}
+
+.paragraph-wrap {
+  gap: 6px;
+  display: flex;
+  flex-direction: column;
+}

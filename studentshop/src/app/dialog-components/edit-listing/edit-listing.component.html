@@ -1,0 +1,173 @@
+<div class="dialog-card">
+  <button (click)="closeAllDialogs()" class="button circle-btn no-border outer-corner"><i class="fi fi-rr-cross icon micro-icon"></i></button>
+  <div class="card-section">
+    <h4 class="dialog-title">Edit listing</h4>
+    @switch (editListingData?._index) {
+      @case ("notes") {
+        <form class="form" id="editListing" #form="ngForm" (ngSubmit)="updateNote(form)" novalidate>
+          <div class="overview vertical-listing small-listing">
+            <div class="overview-left no-wrap">
+              <a (click)="navigateToItemPage('/notes/' + editListingData?._id)" class="item-thumb"><img src="{{ editListingData | getImageUrl }}" loading="lazy" class="item-cover small"></a>
+              <div class="item-wrap">
+                <div class="item-content">
+                  <div class="item-section">
+                    <a (click)="navigateToItemPage('/notes/' + editListingData?._id)" class="title item-title link-underline-hover block-title">{{ editListingData?.title }}</a>
+                    <div class="item-details">
+                      <div class="category status" [style.background-color]="(editListingData | getStatus).backgroundColour">
+                        <div class="category-text status" [style.color]="(editListingData | getStatus).textColour">{{ (editListingData | getStatus).text }}</div>
+                      </div>
+                    </div>
+                    <div class="item-info">Created: {{ editListingData?.dateCreated | formatDate }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div *ngIf="![Note.NoteStatus.PROCESSING, Note.NoteStatus.DELETED, Note.NoteStatus.PROCESSING_ERROR].includes(editListingData?.status || '')" class="overview-right">
+              <button type="button" [disabled]="isDownloadLoading" (click)="downloadNote(editListingData?._id, editListingData?.title)" class="button pill-btn no-border dark fill-width">
+                <div class="button-text-wrap">
+                  @if (isDownloadLoading) {
+                    Loading...
+                  } @else {
+                    Download
+                    <i class="fi fi-rr-arrow-alt-circle-down icon mini-icon white"></i>
+                  }
+                </div>
+              </button>
+            </div>
+            <button (click)="toggleContextMenu($event)" type="button" class="button no-border circle-btn small inner-corner mini-corner">
+              <i class="fi fi-rs-menu-dots icon mini-icon"></i>
+            </button>
+          </div>
+          @if (editListingData?.status === Note.NoteStatus.PROCESSING) {
+            <div class="status-overview" [style.background-color]="(editListingData | getStatus).backgroundColour">
+              <div [style.color]="(editListingData | getStatus).textColour">
+                Please wait for your notes to finish processing before making changes.
+              </div>
+            </div>
+          } @else if (editListingData?.status === Note.NoteStatus.REJECTED && editListingData?.rejectReason) {
+            <div class="status-overview" [style.background-color]="(editListingData | getStatus).backgroundColour">
+              <div [style.color]="(editListingData | getStatus).textColour">
+                <strong>Reason for rejection:</strong>
+                {{ editListingData?.rejectReason?.feedback }}
+              </div>
+            </div>
+          } @else if (editListingData?.status === Note.NoteStatus.PENDING_REVIEW) {
+            <div class="status-overview" [style.background-color]="(editListingData | getStatus).backgroundColour">
+              <div [style.color]="(editListingData | getStatus).textColour">
+                Your notes are under manual review. We’ll approve or reject them and notify you within 7 business days.
+              </div>
+            </div>
+          } @else if (editListingData?.status === Note.NoteStatus.PROCESSING_ERROR) {
+            <div class="status-overview" [style.background-color]="(editListingData | getStatus).backgroundColour">
+              <div [style.color]="(editListingData | getStatus).textColour">
+                We encountered an error while processing your notes. Try deleting the listing and uploading it again.
+              </div>
+            </div>
+          }
+          <div [class.disabled]="isUpdateRestricted" class="input-wrap">
+            <label>Title
+              <i class="fi fi-rr-info icon info-icon">
+                <div class="overlay-dropdown-wrap">
+                  <div class="custom-dropdown">
+                    <p class="text-fine-print">A short, clear name for your notes.</p>
+                  </div>
+                </div>
+              </i>
+            </label>
+            <input [disabled]="isUpdateRestricted" [(ngModel)]="title" [ngClass]="{'error': (form['submitted'] && form.controls['title'].invalid)}" required name="title" class="form-field input" autocomplete="off" minlength="1" maxlength="100" placeholder="Enter a title" [pattern]="nonEmptyRegex" type="text">
+            <div class="form-error-text" *ngIf="form['submitted'] && form.controls['title'].invalid">
+              @if (form.controls['title'].errors?.['required']) {
+                *Title is required.
+              } @else {
+                *Title is invalid.
+              }
+            </div>
+          </div>
+          <div [class.disabled]="isUpdateRestricted" class="input-wrap">
+            <label>Subject
+              <i class="fi fi-rr-info icon info-icon">
+                <div class="overlay-dropdown-wrap">
+                  <div class="custom-dropdown">
+                    <p class="text-fine-print">Pick the main subject or course for these notes.</p>
+                  </div>
+                </div>
+              </i>
+            </label>
+            <div #subjectCombobox class="combobox-wrap">
+              <div *ngIf="selectedSubjects.length > 0" class="combobox-categories">
+                @for (selectedSubject of selectedSubjects; track $index) {
+                  <div class="subject-category category">
+                    <div class="category-text">{{ selectedSubject }}</div>
+                    <button type="button" (click)="removeSelectedSubject(selectedSubject)" class="button circle-btn no-border transparent mini"><i class="fi fi-rr-cross icon nano-icon"></i></button>
+                  </div>
+                }
+              </div>
+              <input [disabled]="isUpdateRestricted" #subjectInput [(ngModel)]="subjectSearchQuery" (ngModelChange)="serveSubjects()" *ngIf="selectedSubjects.length < 1" (focusin)="isSubjectsAutocompleteVisible = true" name="subject" autocomplete="off" class="nested-form-field input" placeholder="Enter a subject" type="text">
+            </div>
+            <div #subjectAutocompleteDropdown *ngIf="isSubjectsAutocompleteVisible" class="dropdown-wrap">
+              <div class="custom-dropdown">
+                <p *ngIf="getSubjectsAutocompleteList().length === 0" class="text-fine-print">No matches found.</p>
+                @for (subject of getSubjectsAutocompleteList(); track $index) {
+                  <button type="button" (click)="addSelectedSubject(subject)" class="button no-border small dropdown-result">{{ subject }}</button>
+                }
+              </div>
+            </div>
+          </div>
+          <div [class.disabled]="isUpdateRestricted" class="input-wrap">
+            <label>Description
+              <i class="fi fi-rr-info icon info-icon">
+                <div class="overlay-dropdown-wrap">
+                  <div class="custom-dropdown">
+                    <p class="text-fine-print">A quick summary buyers will read before they click.</p>
+                  </div>
+                </div>
+              </i>
+            </label>
+            <textarea [disabled]="isUpdateRestricted" [(ngModel)]="description" [ngClass]="{'error': (form['submitted'] && form.controls['description'].invalid)}" required name="description" class="text-area" autocomplete="off" minlength="1" maxlength="2000" placeholder="Enter a description" [pattern]="nonEmptyRegex" type="text"></textarea>
+            <div class="form-error-text" *ngIf="form['submitted'] && form.controls['description'].invalid">
+              @if (form.controls['description'].errors?.['required']) {
+                *Description is required.
+              } @else {
+                *Description is invalid.
+              }
+            </div>
+          </div>
+          <div [class.disabled]="isUpdateRestricted" class="input-wrap">
+            <label>Price
+              <i class="fi fi-rr-info icon info-icon">
+                <div class="overlay-dropdown-wrap">
+                  <div class="custom-dropdown">
+                    <p class="text-fine-print">Set the amount you want to sell this note for.</p>
+                  </div>
+                </div>
+              </i>
+            </label>
+            <input [disabled]="isUpdateRestricted" [(ngModel)]="price" [ngClass]="{'error': (form['submitted'] && form.controls['price'].invalid)}" required name="price" class="form-field input" autocomplete="off" placeholder="Enter a sales price" [pattern]="priceRegex" type="number">
+            <div class="form-error-text" *ngIf="form['submitted'] && form.controls['price'].invalid">
+              @if (form.controls['price'].errors?.['required']) {
+                *Price is required.
+              } @else if (form.controls['price'].errors?.['pattern']) {
+                *Price must be between $0 and $200 (up to two decimal places).
+              } @else {
+                *Price is invalid.
+              }
+            </div>
+          </div>
+        </form>
+      }
+    }
+  </div>
+  <div *ngIf="errorMessage || successMessage">
+    <div class="form-error-text" *ngIf="errorMessage">{{ errorMessage }}</div>
+    <div *ngIf="successMessage" class="form-success-text"><i class="fi fi-br-check icon micro-icon green"></i>{{ successMessage }}</div>
+  </div>
+  <div class="item-actions vertical">
+    <button [disabled]="isUpdateLoading || isUpdateRestricted" form="editListing" type="submit" class="action-btn dark button">
+      @if (isUpdateLoading) {
+        <div class="button-text-wrap">Loading...</div>
+      } @else {
+        <div class="button-text-wrap">Update Listing</div>
+      }
+    </button>
+  </div>
+</div>

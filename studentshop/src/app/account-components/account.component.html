@@ -1,0 +1,36 @@
+<div class="section-regular">
+  <div class="container">
+    <div class="settings contents">
+      <div class="aside">
+        <div class="menus-wrap">
+          <div class="menus">
+            <a [routerLink]="authenticationService.isLoggedIn ? './profile' : null" (click)="!authenticationService.isLoggedIn && toggleLogin()" class="menu" [class.disabled]="!authenticationService.isLoggedIn" routerLinkActive="--current"><i class="fi fi-rr-circle-user icon small-icon"></i>
+              <div class="setting-label">Profile</div>
+            </a>
+            <a [routerLink]="authenticationService.isLoggedIn ? './earnings' : null" (click)="!authenticationService.isLoggedIn && toggleLogin()" class="menu" [class.disabled]="!authenticationService.isLoggedIn" routerLinkActive="--current"><i class="fi fi-rr-usd-circle icon small-icon"></i>
+              <div class="setting-label">Earnings</div>
+            </a>
+            <a [routerLink]="authenticationService.isLoggedIn ? './purchases' : null" (click)="!authenticationService.isLoggedIn && toggleLogin()" class="menu" [class.disabled]="!authenticationService.isLoggedIn" routerLinkActive="--current"><i class="fi fi-rr-receipt icon small-icon"></i>
+              <div class="setting-label">Purchases</div>
+            </a>
+            <a [routerLink]="authenticationService.isLoggedIn ? './privacy' : null" (click)="!authenticationService.isLoggedIn && toggleLogin()" class="menu" [class.disabled]="!authenticationService.isLoggedIn" routerLinkActive="--current"><i class="fi fi-rr-eye icon small-icon"></i>
+              <div class="setting-label">Privacy</div>
+            </a>
+            <a [routerLink]="authenticationService.isLoggedIn ? './security' : null" (click)="!authenticationService.isLoggedIn && toggleLogin()" class="menu" [class.disabled]="!authenticationService.isLoggedIn" routerLinkActive="--current"><i class="fi fi-rr-lock icon small-icon"></i>
+              <div class="setting-label">Password &amp; Security</div>
+            </a>
+            <div class="menu-separator"></div>
+            <a [routerLink]="authenticationService.isLoggedIn ? './listings' : null" (click)="!authenticationService.isLoggedIn && toggleLogin()" class="menu" [class.disabled]="!authenticationService.isLoggedIn" routerLinkActive="--current"><i class="fi fi-rr-edit icon small-icon"></i>
+              <div class="setting-label">Manage Listings</div>
+            </a>
+            <div class="menu-separator"></div>
+            <a *ngIf="authenticationService.isLoggedIn" (click)="logout()" class="menu"><i class="fi fi-rr-sign-out-alt icon small-icon"></i>
+              <div class="setting-label">Log out</div>
+            </a>
+          </div>
+        </div>
+      </div>
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>
